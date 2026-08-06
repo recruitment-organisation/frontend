@@ -1,0 +1,29 @@
+<div class="home">
+  <section class="hero section" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <p class="badge">✦ Société de technologies numériques</p>
+      <h1 id="hero-title">Des solutions IT qui font avancer les métiers.</h1>
+      <p class="lead">HireFlow accompagne les organisations dans la conception de produits digitaux, de plateformes métier et de solutions data qui créent un impact concret.</p>
+      <div class="actions"><a routerLink="/services" class="button primary">Découvrir nos expertises <span>→</span></a><a routerLink="/contact" class="button secondary">Parler de votre projet</a></div>
+      <div class="trust"><span>Conseil IT</span><span>Développement logiciel</span><span>Innovation responsable</span></div>
+    </div>
+    <div class="technology-visual" aria-label="Illustration de notre approche technologique">
+      <div class="visual-top"><span>HireFlow / digital systems</span><b>IT</b></div>
+      <div class="system-card main"><span class="system-icon">◫</span><div><small>Plateforme métier</small><strong>Une expérience claire, de bout en bout.</strong></div><i>↗</i></div>
+      <div class="system-card data"><span class="system-icon">✦</span><div><small>Data & IA</small><strong>Des décisions mieux informées.</strong></div></div>
+      <div class="technology-flow"><span>Conseil</span><i></i><span>Conception</span><i></i><span>Produit</span></div>
+    </div>
+  </section>
+
+  <section class="company-strip section" aria-label="Notre positionnement"><article><strong>Technologie</strong><span>Des solutions alignées sur vos enjeux métier.</span></article><article><strong>Expertise</strong><span>Des équipes qui relient produit, data et ingénierie.</span></article><article><strong>Partenariat</strong><span>Une collaboration simple, structurée et durable.</span></article></section>
+
+  <section class="section intro"><p class="eyebrow">Notre mission</p><h2>Rendre le numérique plus utile, plus clair et plus durable.</h2><p>Nous aidons les entreprises à transformer une idée ou un besoin complexe en solution digitale solide, adoptée par les équipes et prête à évoluer.</p></section>
+
+  <section class="features section">@for (item of expertise; track item.title) {<article><span class="feature-icon">{{ item.icon }}</span><h3>{{ item.title }}</h3><p>{{ item.description }}</p><a routerLink="/services">En savoir plus <span>→</span></a></article>}</section>
+
+  <section class="approach section"><div><p class="eyebrow">Notre manière de travailler</p><h2>Du premier échange au produit qui vit.</h2><p>Une démarche pragmatique pour aligner les décisions, sécuriser la réalisation et créer de la valeur à chaque étape.</p></div><ol><li><b>01</b><div><h3>Explorer</h3><p>Comprendre le contexte, les utilisateurs et les priorités réelles.</p></div></li><li><b>02</b><div><h3>Concevoir</h3><p>Donner une forme claire à l’expérience, à l’architecture et à la feuille de route.</p></div></li><li><b>03</b><div><h3>Construire</h3><p>Développer, tester et livrer par étapes visibles avec vos équipes.</p></div></li><li><b>04</b><div><h3>Faire évoluer</h3><p>Mesurer, améliorer et accompagner l’adoption dans la durée.</p></div></li></ol></section>
+
+  <section class="commitments section"><div><p class="eyebrow">Notre engagement</p><h2>La technologie au service d’une progression mesurable.</h2></div><div class="commitment-grid">@for (commitment of commitments; track commitment.title) {<article><span>0{{ $index + 1 }}</span><h3>{{ commitment.title }}</h3><p>{{ commitment.text }}</p></article>}</div></section>
+
+  <section class="final-cta section"><p class="badge">Un besoin digital ?</p><h2>Construisons la prochaine étape de votre organisation.</h2><p>Partagez-nous votre contexte : nous vous aiderons à identifier le bon point de départ.</p><div class="actions"><a routerLink="/contact" class="button light">Nous contacter</a><a routerLink="/about" class="button outline-light">Découvrir HireFlow</a></div></section>
+</div>

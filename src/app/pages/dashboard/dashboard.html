@@ -1,0 +1,46 @@
+<div class="dashboard-container" *ngIf="isLoggedIn && currentUser; else loading">
+  <section class="dashboard-card">
+    <p class="eyebrow">Session active</p>
+    <h1>Bienvenue {{ currentUser.firstName || currentUser.username }}</h1>
+
+    <p class="lead">
+      L'architecture métier n'est pas encore branchée côté Angular. Cette page
+      expose uniquement les informations de session confirmées par le backend.
+    </p>
+
+    <div class="identity-grid">
+      <div class="identity-item">
+        <span>Nom d'utilisateur</span>
+        <strong>{{ currentUser.username }}</strong>
+      </div>
+
+      <div class="identity-item">
+        <span>Email</span>
+        <strong>{{ currentUser.email }}</strong>
+      </div>
+
+      <div class="identity-item">
+        <span>Rôle principal</span>
+        <strong>{{ primaryRole }}</strong>
+      </div>
+
+      <div class="identity-item">
+        <span>Rôles détectés</span>
+        <strong>{{ currentUser.roles.join(', ') }}</strong>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <a [routerLink]="currentUser.roles.includes('CANDIDATE') ? '/candidate/dashboard' : '/employee/dashboard'">
+        Ouvrir mon espace
+      </a>
+      <button type="button" (click)="logout()">Se déconnecter</button>
+    </div>
+  </section>
+</div>
+
+<ng-template #loading>
+  <div class="loading">
+    Chargement de la session...
+  </div>
+</ng-template>

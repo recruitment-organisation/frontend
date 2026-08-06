@@ -1,0 +1,33 @@
+<div class="workspace-shell" [class]="'workspace-shell tone-' + tone()">
+  <aside class="sidebar">
+    <span class="sidebar-glow glow-one" aria-hidden="true"></span><span class="sidebar-glow glow-two" aria-hidden="true"></span>
+    <a [routerLink]="brandLink()" class="workspace-brand">
+      <span class="brand-mark" aria-hidden="true">✦</span>
+      <div><strong>{{ brand() }}</strong><small>{{ subtitle() }}</small></div>
+    </a>
+    <p class="nav-label">Navigation</p>
+    <nav aria-label="Navigation de l'espace">
+      @for (item of items(); track item.link; let index = $index) {
+        <a [routerLink]="item.link" routerLinkActive="active" [class.has-notifications]="item.badge"><span class="nav-index">{{ (index + 1).toString().padStart(2, '0') }}</span><span>{{ item.label }}</span>@if(item.badge){<span class="nav-badge" [attr.aria-label]="item.badge + ' notification(s) non lue(s)'">{{ formatBadge(item.badge) }}</span>}</a>
+      }
+    </nav>
+    <footer>
+      <div class="user-card"><span class="user-avatar">{{ initials() }}</span><div><strong>{{ auth.getCurrentUser()?.firstName || auth.getCurrentUser()?.username }}</strong><small>{{ workspaceLabel() }}</small></div></div>
+      <button type="button" (click)="logout()"><span aria-hidden="true">↗</span> Déconnexion</button>
+    </footer>
+  </aside>
+  <div class="workspace-main">
+    <header class="workspace-topbar">
+      <div><p>{{ workspaceLabel() }}</p><strong>{{ auth.getCurrentUser()?.firstName || auth.getCurrentUser()?.username }}</strong></div>
+      <div class="workspace-actions">
+        @if(notificationItem(); as notification) {
+          <a [routerLink]="notification.link" class="notification-trigger" [class.has-unread]="notification.badge" [attr.aria-label]="notification.badge ? notification.badge + ' notification(s) non lue(s)' : 'Aucune notification non lue'">
+            <span class="notification-bell" aria-hidden="true">🔔</span><span class="notification-trigger-label">Notifications</span>@if(notification.badge){<span class="notification-count">{{ formatBadge(notification.badge) }}</span>}
+          </a>
+        }
+        <a routerLink="/" class="ui-button ui-button--secondary">Voir le site</a>
+      </div>
+    </header>
+    <main class="workspace-content"><ng-content></ng-content></main>
+  </div>
+</div>

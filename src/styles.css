@@ -1,1 +1,141 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --color-bg: #f5f7fb;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f8faff;
+  --color-surface-subtle: #edf3ff;
+  --color-ink: #17243b;
+  --color-ink-soft: #40516b;
+  --color-muted: #6a7890;
+  --color-primary: #1d4ed8;
+  --color-primary-dark: #1e3a8a;
+  --color-accent: #2563eb;
+  --color-accent-dark: #1d4ed8;
+  --color-accent-soft: #e7efff;
+  --color-border: #d8e2f2;
+  --color-border-strong: #bdcde5;
+  --color-danger: #b54758;
+  --color-danger-soft: #fff2f4;
+  --color-success: #26745e;
+  --color-success-soft: #e9f6ef;
+  --color-warning: #9b681e;
+  --color-warning-soft: #fff6e7;
+  --color-surface-inverse: #172554;
+  --color-inverse-muted: #cbd8f1;
+  --color-inverse-accent: #c7dcff;
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --text-xs: .72rem;
+  --text-sm: .84rem;
+  --text-base: .94rem;
+  --space-1: .25rem;
+  --space-2: .5rem;
+  --space-3: .75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --radius-sm: .5rem;
+  --radius-md: .75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --shadow-xs: 0 1px 2px rgba(27, 49, 89, .04);
+  --shadow-sm: 0 5px 16px rgba(27, 49, 89, .06);
+  --shadow-md: 0 12px 30px rgba(27, 49, 89, .10);
+  --content-max: 1200px;
+  --space-page: clamp(1rem, 4vw, 4rem);
+  --transition: 180ms ease;
+}
+
+* { box-sizing: border-box; }
+html { min-height: 100%; scroll-behavior: smooth; }
+body { min-height: 100%; margin: 0; background: var(--color-bg); color: var(--color-ink); font-family: var(--font-sans); font-size: var(--text-base); line-height: 1.5; text-rendering: optimizeLegibility; }
+button, input, textarea, select { font: inherit; }
+button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
+button { color: inherit; }
+a { color: inherit; }
+img, svg { max-width: 100%; }
+code { font-family: var(--font-mono); }
+
+:focus-visible { outline: 3px solid rgba(37, 99, 235, .32); outline-offset: 3px; }
+
+.ui-button {
+  min-height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: .65rem 1rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 750;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), color var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+.ui-button:hover:not(:disabled) { transform: translateY(-1px); }
+.ui-button:active:not(:disabled) { transform: translateY(0); }
+.ui-button:disabled { cursor: not-allowed; opacity: .52; box-shadow: none; }
+.ui-button--primary { background: var(--color-primary); color: #fff; box-shadow: 0 3px 8px rgba(30, 58, 138, .18); }
+.ui-button--primary:hover:not(:disabled) { background: var(--color-primary-dark); }
+.ui-button--secondary { border-color: var(--color-border); background: var(--color-surface); color: var(--color-ink-soft); }
+.ui-button--secondary:hover:not(:disabled) { border-color: var(--color-border-strong); background: var(--color-surface-muted); }
+.ui-button--light { background: #fff; color: var(--color-primary-dark); }
+.ui-button--outline-light { border-color: rgba(255, 255, 255, .55); color: #fff; background: transparent; }
+.ui-button--outline-light:hover:not(:disabled) { background: rgba(255, 255, 255, .1); }
+
+.ui-input,
+.ui-field input,
+.ui-field textarea,
+.ui-field select {
+  width: 100%;
+  min-height: 2.7rem;
+  padding: .65rem .8rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+}
+.ui-input::placeholder, .ui-field input::placeholder, .ui-field textarea::placeholder { color: #97a6aa; }
+.ui-input:focus, .ui-field input:focus, .ui-field textarea:focus, .ui-field select:focus { outline: 0; border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, .13); }
+.ui-field { display: grid; gap: .4rem; color: var(--color-ink-soft); font-size: var(--text-sm); font-weight: 700; }
+.ui-field textarea { min-height: 6rem; resize: vertical; }
+
+.ui-alert { padding: .75rem .9rem; border: 1px solid transparent; border-radius: var(--radius-sm); font-size: var(--text-sm); line-height: 1.5; }
+.ui-alert--error { border-color: #f0cbd2; background: var(--color-danger-soft); color: #923849; }
+.ui-alert--success { border-color: #c9e6d8; background: var(--color-success-soft); color: var(--color-success); }
+.ui-page-actions { display: flex; justify-content: flex-end; gap: var(--space-3); }
+.ui-modal-form { display: grid; gap: var(--space-4); }
+.ui-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+.ui-modal-section { display: grid; gap: var(--space-3); margin: 0; padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface-muted); }
+.ui-modal-section legend { padding: 0 .25rem; color: var(--color-ink-soft); font-size: var(--text-xs); font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.ui-modal-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: var(--space-3); padding-top: var(--space-2); }
+
+/* Dark presentation areas use the same navy as the navigation. */
+.candidate-hero,
+.application-hero,
+.workspace-hero,
+.dashboard-hero,
+.manager-hero,
+.approach,
+.experience-section,
+.contact-illustration,
+.auth-container .hero-panel,
+.auth-container .intro,
+.footer,
+.assistant-header {
+  background: var(--color-surface-inverse) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}
+
+@media (max-width: 640px) {
+  .ui-form-grid { grid-template-columns: 1fr; }
+  .ui-page-actions, .ui-modal-actions { justify-content: stretch; }
+  .ui-page-actions .ui-button, .ui-modal-actions .ui-button { flex: 1; }
+}

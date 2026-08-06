@@ -1,0 +1,46 @@
+<section class="employee-interviews">
+  <app-page-header
+    eyebrow="Mon planning"
+    title="Mes entretiens"
+    description="Consultez vos entretiens assignés, démarrez-les puis renseignez le retour et la décision."
+  />
+
+  @if(error()){
+    <p class="message error">{{ error() }}</p>
+  }
+
+  <app-interview-list
+    [interviews]="interviews()"
+    [loading]="loading()"
+    emptyLabel="Aucun entretien assigné."
+    startButtonLabel="Démarrer"
+    resultButtonLabel="Résultat"
+    [showCancelButton]="false"
+    (startInterview)="start($event)"
+    (resultInterview)="openFeedback($event)"
+  />
+</section>
+
+<app-dialog title="Résultat de l’entretien" [open]="feedbackDialog()" (closed)="closeFeedback()">
+  <form class="ui-modal-form" [formGroup]="feedbackForm" (ngSubmit)="completeInterview()">
+    <label class="ui-field">
+      Décision
+      <select formControlName="result">
+        <option value="PASSED">Approuvé</option>
+        <option value="FAILED">Non approuvé</option>
+      </select>
+    </label>
+    <label class="ui-field">
+      Retour d’entretien
+      <textarea rows="4" formControlName="feedback" placeholder="Retour obligatoire"></textarea>
+    </label>
+    <label class="ui-field">
+      Notes internes
+      <textarea rows="3" formControlName="notes"></textarea>
+    </label>
+    <div class="ui-modal-actions">
+      <button class="ui-button ui-button--secondary" type="button" (click)="closeFeedback()">Annuler</button>
+      <button class="ui-button ui-button--primary" [disabled]="saving()" type="submit">{{ saving() ? 'Enregistrement…' : 'Enregistrer la décision' }}</button>
+    </div>
+  </form>
+</app-dialog>

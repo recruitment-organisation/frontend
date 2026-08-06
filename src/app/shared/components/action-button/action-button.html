@@ -1,0 +1,3 @@
+<button [type]="type" class="ui-button ui-button--{{ variant }}" [disabled]="disabled || loading">
+  @if (loading) { {{ loadingLabel }} } @else { <ng-content></ng-content> }
+</button>

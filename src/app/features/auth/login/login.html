@@ -1,0 +1,60 @@
+<div class="auth-container">
+  <section class="auth-shell">
+    <div class="hero-panel">
+      <a class="brand-link" routerLink="/">← HireFlow</a>
+      <p class="eyebrow">Plateforme recrutement</p>
+      <h1>La bonne décision commence par la bonne connexion.</h1>
+      <p class="hero-copy">
+        Connectez-vous pour retrouver simplement votre espace de recrutement.
+      </p>
+    </div>
+
+    <div class="auth-card">
+      <p class="eyebrow neutral">Connexion</p>
+      <h2>Accéder à votre espace</h2>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label for="username">Nom d'utilisateur ou email</label>
+          <input class="ui-input"
+            id="username"
+            type="text"
+            formControlName="username"
+            placeholder="nom d'utilisateur ou email" autocomplete="username"
+          />
+          @if (username?.invalid && username?.touched) {
+            <span class="error">
+              @if (username?.errors?.['required']) {
+                Le champ est requis.
+              }
+            </span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="password">Mot de passe</label>
+          <div class="password-wrap"><input class="ui-input" id="password" [type]="showPassword() ? 'text' : 'password'" formControlName="password" placeholder="••••••••" autocomplete="current-password" /><button type="button" class="password-toggle" (click)="togglePassword()" [attr.aria-label]="showPassword() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'">{{ showPassword() ? 'Masquer' : 'Afficher' }}</button></div>
+          @if (password?.invalid && password?.touched) {
+            <span class="error">
+              @if (password?.errors?.['required']) {
+                Le mot de passe est requis.
+              } @else if (password?.errors?.['minlength']) {
+                Minimum 6 caractères.
+              }
+            </span>
+          }
+        </div>
+
+        @if (errorMessage) {
+          <div class="ui-alert ui-alert--error" role="alert">{{ errorMessage }}</div>
+        }
+
+        <app-action-button type="submit" [loading]="loading()" loadingLabel="Connexion…">Se connecter</app-action-button>
+      </form>
+
+      <p class="switch-link">
+        Nouveau candidat ? <a routerLink="/auth/signup">Créer un compte candidat</a>
+      </p>
+    </div>
+  </section>
+</div>

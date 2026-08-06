@@ -1,0 +1,76 @@
+<section class="applications-page">
+  <header>
+    <p class="eyebrow">Espace candidat</p>
+    <h1>Mes candidatures</h1>
+    <p>Retrouvez vos candidatures et l’étape active de leur workflow.</p>
+  </header>
+
+  @if (loading()) {
+    <p class="state">Chargement de votre parcours…</p>
+  } @else if (error()) {
+    <div class="state error"><p>{{ error() }}</p><button type="button" (click)="load()">Réessayer</button></div>
+  } @else {
+    <div class="application-list">
+      @for (application of applications(); track application.id) {
+        <article tabindex="0" role="button" (click)="open(application)" (keydown.enter)="open(application)">
+          <div class="application-id">✓</div>
+          <div>
+            <h2>Candidature envoyée</h2>
+            <p>Envoyée le {{ application.appliedAt | date:'dd/MM/yyyy' }}</p>
+          </div>
+          <app-status-badge [status]="application.status"/>
+          <small class="workflow-stage">Étape active : <strong>{{ isWorkflowFinished(application) ? 'Processus terminé' : currentWorkflowLabel(application) }}</strong></small>
+        </article>
+      } @empty {
+        <div class="state"><h2>Aucune candidature pour l’instant</h2><p>Quand vous postulez, son suivi apparaîtra ici.</p></div>
+      }
+    </div>
+
+    <div class="pagination"><button type="button" [disabled]="page() === 0" (click)="load(page() - 1)">Précédent</button><span>Page {{ page() + 1 }} · {{ total() }} candidature(s)</span><button type="button" [disabled]="(page() + 1) * pageSize >= total()" (click)="load(page() + 1)">Suivant</button></div>
+  }
+
+  @if (success()) { <p class="state success">{{ success() }}</p> }
+</section>
+
+<app-dialog title="Détails de ma candidature" size="wide" [open]="!!selected()" (closed)="selected.set(null)">
+  @if (selected(); as application) {
+    <div class="application-details">
+      <header class="application-hero"><div><span class="eyebrow">Suivi de candidature</span><h3>Suivi de votre dossier</h3><p>Retrouvez vos informations et l’avancement du workflow.</p></div><app-status-badge [status]="application.status"/></header>
+      <div class="application-detail-grid">
+        <article><span>Offre</span><strong>Offre sélectionnée</strong></article>
+        <article><span>Étape métier</span><strong>{{ application.currentStep || 'En préparation' }}</strong></article>
+        <article><span>Score de matching</span><strong>{{ application.matchingScore ?? 'Non disponible' }}@if (application.matchingScore !== undefined) {<small>/100</small>}</strong></article>
+        <article><span>CV</span><strong>{{ application.cvId ? 'Document joint' : 'Aucun document' }}</strong></article>
+        <article><span>Envoyée le</span><strong>{{ application.appliedAt | date:'dd MMM yyyy · HH:mm' }}</strong></article>
+        <article><span>Dernière mise à jour</span><strong>{{ application.updatedAt | date:'dd MMM yyyy · HH:mm' }}</strong></article>
+      </div>
+
+      <section class="workflow-tracking">
+        <header><div><span class="eyebrow">Workflow</span><h4>Votre parcours</h4></div><span class="workflow-state">{{ application.processInstanceId ? (isWorkflowFinished(application) ? 'Terminé' : 'Processus en cours') : 'Non démarré' }}</span></header>
+        @if (!application.processInstanceId) {
+          <p>Le processus démarrera dès que votre candidature sera soumise.</p>
+        } @else if (isWorkflowFinished(application)) {
+          <p class="workflow-finished">{{ workflowCompletionMessage(application) }}</p>
+        } @else {
+          <div class="workflow-progress"><strong>Étape actuelle : {{ currentWorkflowLabel(application) }}</strong><small>{{ remainingWorkflowStepCount(application) }} étape(s) restante(s)</small></div>
+          @if(requiresCvRevision(application)){
+            <section class="cv-revision-alert" [class.cv-revision-alert--expired]="isCvRevisionExpired(application)" role="alert"><div><strong>Révision du CV requise</strong><p>Remplacez votre CV par un PDF complet avant l’expiration du délai. Après 2 heures, votre candidature sera automatiquement rejetée.</p></div><time aria-label="Temps restant pour corriger le CV">{{ cvRevisionTimeLeft(application) }}</time></section>
+          }
+          <ol class="workflow-timeline" aria-label="Étapes de votre candidature">
+            @for (step of workflowSteps; track step.key; let index = $index) {
+              <li [class.completed]="workflowStepState(application, index) === 'completed'" [class.current]="workflowStepState(application, index) === 'current'"><span class="timeline-index">{{ index + 1 }}</span><div><strong>{{ step.label }}</strong><small>{{ step.description }}</small></div></li>
+            }
+          </ol>
+          @if (workflowTaskLoading()) { <p>Vérification de l’étape en cours…</p> }
+          @else { <div class="workflow-task"><strong>{{ workflowTask()?.taskName || application.currentTaskName || currentWorkflowLabel(application) }}</strong><span>{{ workflowTask()?.taskDefinitionKey || application.currentTaskDefinitionKey || 'Étape synchronisée' }}</span>@if (workflowTaskError()) {<p class="workflow-note">{{ workflowTaskError() }}</p>}</div> }
+        }
+      </section>
+
+      @if (canReplaceCv(application)) {
+        <section class="cv-replacement"><div><span class="eyebrow">Document</span><h4>{{ requiresCvRevision(application) ? 'Corriger mon CV' : 'Remplacer mon CV' }}</h4><p>{{ requiresCvRevision(application) ? 'Le nouveau PDF relancera immédiatement la validation du workflow.' : 'Le nouveau fichier PDF remplacera le document actuel.' }}</p></div><label class="upload-button">{{ updatingCv() ? 'Envoi en cours…' : 'Choisir un PDF' }}<input type="file" accept="application/pdf,.pdf" [disabled]="updatingCv()" (change)="replaceCv($event)"/></label></section>
+      } @else {
+        <section class="cv-replacement"><div><span class="eyebrow">Document verrouillé</span><h4>Modification du CV indisponible</h4><p>Le CV est verrouillé pendant et après le filtrage RH afin de préserver la décision prise sur votre candidature.</p></div></section>
+      }
+    </div>
+  }
+</app-dialog>

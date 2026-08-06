@@ -1,0 +1,38 @@
+<section class="dashboard-shell">
+  <header class="workspace-hero">
+    <div>
+      <p class="eyebrow">Espace sécurisé</p>
+      <h1>{{ workspaceMode }}</h1>
+      <p>Un espace de travail clair, construit à partir de vos rôles réels et des fonctionnalités déjà disponibles dans la plateforme.</p>
+      <div class="hero-actions">
+        <a routerLink="/employee/profile" class="ui-button ui-button--light">Mon profil <span>→</span></a>
+        <a routerLink="/employee/applications" class="ui-button ui-button--outline-light">Candidatures</a>
+      </div>
+    </div>
+    <div class="workspace-mark" aria-hidden="true"><span>✦</span><small>Session active</small></div>
+  </header>
+
+  <div class="stats-grid">
+    <app-stat-card label="Mode" [value]="workspaceMode" hint="Calculé à partir des rôles présents dans le token" />
+    <app-stat-card label="Rôles actifs" [value]="auth.getRoles().join(', ') || 'EMPLOYEE'" hint="HR et MANAGER restent deux rôles distincts" />
+    <app-stat-card label="Navigation" value="Dynamique" hint="Les accès sont adaptés à votre session" />
+  </div>
+
+  <div class="content-grid">
+    <article class="role-summary">
+      <p class="section-label">Votre environnement</p>
+      <h2>Des accès alignés sur votre rôle.</h2>
+      <ul>
+        <li><span>✓</span>Vues distinctes pour les offres, candidatures, candidats et entretiens</li>
+        <li><span>✓</span>Accès protégé selon les rôles réellement détectés</li>
+        <li><span>✓</span>Connexion unique via le gateway, sans exposer les ports internes</li>
+      </ul>
+    </article>
+    <article class="quick-panel">
+      <p class="section-label">Accès rapide</p>
+      <h2>Continuez votre travail.</h2>
+      <a routerLink="/employee/offers"><span>⌁</span><div><strong>Offres d’emploi</strong><small>Consulter les offres disponibles</small></div><b>→</b></a>
+      <a routerLink="/employee/applications"><span>◌</span><div><strong>Candidatures</strong><small>Suivre le processus de recrutement</small></div><b>→</b></a>
+    </article>
+  </div>
+</section>

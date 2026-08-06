@@ -1,0 +1,7 @@
+@if (snackbar.current(); as message) {
+  <div class="snackbar" [class]="'snackbar snackbar--' + message.kind" [attr.role]="message.kind === 'error' ? 'alert' : 'status'" aria-live="polite">
+    <span class="snackbar__icon" aria-hidden="true">{{ message.kind === 'success' ? '✓' : message.kind === 'error' ? '!' : 'i' }}</span>
+    <p>{{ message.text }}</p>
+    <button type="button" aria-label="Fermer la notification" (click)="snackbar.dismiss()">×</button>
+  </div>
+}

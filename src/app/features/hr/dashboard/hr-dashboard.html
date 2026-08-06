@@ -1,0 +1,81 @@
+<section class="dashboard-shell">
+  <div class="dashboard-toolbar">
+    <div><span class="live-indicator"><i></i>Données opérationnelles</span><p>Vue d’ensemble du recrutement et des priorités à traiter.</p></div>
+    <button class="refresh-button" type="button" [disabled]="loading()" (click)="load()"><span aria-hidden="true">↻</span>{{ loading() ? 'Actualisation…' : 'Actualiser' }}</button>
+  </div>
+
+  <section class="dashboard-hero">
+    <div class="hero-copy">
+      <p class="eyebrow">{{ isManagerView ? 'Espace manager' : 'Centre de pilotage RH' }}</p>
+      <h1>Bonjour {{ auth.getCurrentUser()?.firstName || auth.getCurrentUser()?.username }}.</h1>
+      <p>{{ isManagerView ? 'Gardez une lecture claire des candidatures à décider et des entretiens à venir.' : 'Pilotez le recrutement depuis une vue claire, actionnable et toujours centrée sur le pipeline.' }}</p>
+      <div class="hero-actions">
+        @if (isManagerView) {
+          <a [routerLink]="routeFor('candidates')" class="ui-button ui-button--light">Voir les candidats <span>→</span></a>
+          <a [routerLink]="routeFor('applications')" class="ui-button ui-button--outline-light">Voir les candidatures</a>
+        } @else {
+          <a routerLink="/hr/offers" class="ui-button ui-button--light">Gérer les offres <span>→</span></a>
+          <a routerLink="/hr/interviews" class="ui-button ui-button--outline-light">Voir l’agenda</a>
+        }
+      </div>
+    </div>
+    <aside class="hero-pulse" aria-label="Résumé du pipeline">
+      <div class="pulse-heading"><span>Décisions finalisées</span><i aria-hidden="true">↗</i></div>
+      <strong>{{ loading() ? '—' : pipeline().completionRate + '%' }}</strong>
+      <p>{{ loading() ? 'Calcul du pipeline…' : pipeline().decided + ' décision' + (pipeline().decided > 1 ? 's' : '') + ' sur ' + pipeline().applications + ' candidatures' }}</p>
+      <div class="pulse-track" aria-hidden="true"><span [style.width.%]="pipeline().completionRate"></span></div>
+      <div class="pulse-footer"><span><b>{{ loading() ? '—' : pipeline().pending }}</b> à traiter</span><span><b>{{ loading() ? '—' : pipeline().scheduledInterviews }}</b> entretiens</span></div>
+    </aside>
+  </section>
+
+  @if (loading()) {
+    <div class="skeleton-grid" aria-label="Chargement des indicateurs"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+  } @else if (error()) {
+    <div class="state error" role="alert"><div><strong>Les indicateurs ne sont pas disponibles.</strong><span>{{ error() }}</span></div><button class="ui-button ui-button--primary" type="button" (click)="load()">Réessayer</button></div>
+  } @else {
+    <div class="stats-grid">
+      @if (isManagerView) {
+        <button class="stat-link" type="button" (click)="departmentDialog.set(true)"><app-stat-card icon="⌘" label="Départements" [value]="'' + totals().departments" hint="Organisation en lecture seule"/></button>
+        <div><app-stat-card icon="◫" tone="teal" label="Employés" [value]="'' + totals().employees" hint="Référentiel des équipes"/></div>
+        <a [routerLink]="routeFor('candidates')"><app-stat-card icon="◎" tone="amber" label="Candidats" [value]="'' + totals().candidates" hint="Profils dans le vivier"/></a>
+        <div><app-stat-card icon="↗" tone="teal" label="Offres actives" [value]="'' + totals().activeOffers" hint="Offres avec le statut OPEN"/></div>
+        <a [routerLink]="routeFor('applications')"><app-stat-card icon="◌" label="Candidatures" [value]="'' + totals().applications" hint="Total du pipeline"/></a>
+        <div><app-stat-card icon="◷" tone="amber" label="Entretiens planifiés" [value]="'' + totals().scheduledInterviews" hint="Statut SCHEDULED"/></div>
+        <a [routerLink]="routeFor('applications')"><app-stat-card icon="…" tone="amber" label="En attente" [value]="'' + totals().pending" hint="Soumises ou en analyse IA"/></a>
+        <a [routerLink]="routeFor('applications')"><app-stat-card icon="✓" tone="rose" label="Décisions" [value]="totals().hired + ' / ' + totals().rejected" hint="Embauchées / rejetées"/></a>
+      } @else {
+        <button class="stat-link" type="button" (click)="departmentDialog.set(true)"><app-stat-card icon="⌘" label="Départements" [value]="'' + totals().departments" hint="Voir et gérer l’organisation"/></button>
+        <a routerLink="/hr/employees"><app-stat-card icon="◫" tone="teal" label="Employés" [value]="'' + totals().employees" hint="Référentiel des équipes"/></a>
+        <a [routerLink]="routeFor('candidates')"><app-stat-card icon="◎" tone="amber" label="Candidats" [value]="'' + totals().candidates" hint="Profils dans le vivier"/></a>
+        <a routerLink="/hr/offers"><app-stat-card icon="↗" tone="teal" label="Offres actives" [value]="'' + totals().activeOffers" hint="Offres avec le statut OPEN"/></a>
+        <a [routerLink]="routeFor('applications')"><app-stat-card icon="◌" label="Candidatures" [value]="'' + totals().applications" hint="Total du pipeline"/></a>
+        <a routerLink="/hr/interviews"><app-stat-card icon="◷" tone="amber" label="Entretiens planifiés" [value]="'' + totals().scheduledInterviews" hint="Statut SCHEDULED"/></a>
+        <a [routerLink]="routeFor('applications')"><app-stat-card icon="…" tone="amber" label="En attente" [value]="'' + totals().pending" hint="Soumises ou en analyse IA"/></a>
+        <a [routerLink]="routeFor('applications')"><app-stat-card icon="✓" tone="rose" label="Décisions" [value]="totals().hired + ' / ' + totals().rejected" hint="Embauchées / rejetées"/></a>
+      }
+    </div>
+
+    <section class="decision-grid">
+      <article class="pipeline-panel">
+        <header><div><p class="section-label">Santé du pipeline</p><h2>Où sont les candidatures ?</h2></div><strong>{{ pipeline().applications }}<small>au total</small></strong></header>
+        @if (pipeline().applications) {
+          <div class="pipeline-bar" aria-label="Répartition des candidatures"><span class="pending" [style.flex-grow]="pipeline().pending"></span><span class="progress" [style.flex-grow]="pipeline().inProgress"></span><span class="hired" [style.flex-grow]="pipeline().hired"></span><span class="rejected" [style.flex-grow]="pipeline().rejected"></span></div>
+        } @else { <div class="pipeline-bar empty" aria-label="Aucune candidature"></div> }
+        <div class="pipeline-legend"><span><i class="pending"></i>À traiter <b>{{ pipeline().pending }}</b></span><span><i class="progress"></i>En cours <b>{{ pipeline().inProgress }}</b></span><span><i class="hired"></i>Embauchées <b>{{ pipeline().hired }}</b></span><span><i class="rejected"></i>Rejetées <b>{{ pipeline().rejected }}</b></span></div>
+      </article>
+      <aside class="focus-panel"><p class="section-label">À prioriser</p><h2>{{ pipeline().pending ? pipeline().pending + ' candidature' + (pipeline().pending > 1 ? 's' : '') + ' à examiner' : 'Pipeline à jour' }}</h2><p>{{ pipeline().pending ? 'Les candidatures soumises ou en analyse IA attendent une décision RH.' : 'Aucune candidature en attente de première analyse actuellement.' }}</p><a [routerLink]="routeFor('applications')">Ouvrir les candidatures <span>→</span></a></aside>
+    </section>
+
+    <div class="content-grid">
+      <article class="data-panel"><header><div><p class="section-label">Dernières entrées</p><h2>Candidatures récentes</h2></div><a [routerLink]="routeFor('applications')">Tout voir <span>→</span></a></header>@for (application of recent(); track application.id){<div class="row"><span class="row-icon">↗</span><div><strong>Nouvelle candidature</strong><small>Dossier de candidature reçu</small></div><app-status-badge [status]="application.status"/></div>}@empty{<p class="empty-copy">Aucune candidature à afficher pour le moment.</p>}</article>
+      <article class="data-panel agenda-panel"><header><div><p class="section-label">Agenda</p><h2>Entretiens à venir</h2></div><a routerLink="/hr/interviews">Agenda <span>→</span></a></header>@for (interview of upcoming();track interview.id){<div class="row"><span class="row-icon calendar">◷</span><div><strong>Entretien planifié</strong><small>{{interview.scheduledAt | date:'dd MMM · HH:mm'}} · {{interview.type}}</small></div><app-status-badge [status]="interview.status || 'SCHEDULED'"/></div>}@empty{<p class="empty-copy">Aucun entretien planifié à venir.</p>}</article>
+    </div>
+  }
+</section>
+
+<app-dialog title="Départements" [open]="departmentDialog()" (closed)="cancelDepartmentEdit(); departmentDialog.set(false)">
+  <div class="department-list">@for(department of departments();track department.id){<article><div><strong>{{ department.name }}</strong><span>{{ department.description }}</span></div>@if(!isManagerView){<div class="department-actions"><button type="button" (click)="editDepartment(department)">Modifier</button><button type="button" class="danger" (click)="confirmDepartmentDeletion(department)">Supprimer</button></div>}</article>}@empty{<p>Aucun département.</p>}</div>
+  @if(!isManagerView){<form class="department-form" [formGroup]="departmentForm" (ngSubmit)="saveDepartment()"><h3>{{ editingDepartment() ? 'Modifier le département' : 'Nouveau département' }}</h3><label>Nom<input formControlName="name"/></label><label>Description<textarea formControlName="description" rows="3"></textarea></label>@if(departmentError()){<p class="form-error">{{departmentError()}}</p>}@if(departmentSuccess()){<p class="form-success">{{departmentSuccess()}}</p>}<div class="form-actions">@if(editingDepartment()){<button class="ui-button ui-button--secondary" type="button" (click)="cancelDepartmentEdit()">Annuler</button>}<button class="ui-button ui-button--primary" [disabled]="departmentSaving()" type="submit">{{ editingDepartment() ? 'Enregistrer' : 'Créer le département' }}</button></div></form>}
+</app-dialog>
+
+@if(!isManagerView){<app-dialog title="Supprimer ce département ?" [open]="!!departmentPendingDeletion()" (closed)="departmentPendingDeletion.set(null)"><p>Cette action est définitive. Le serveur refusera la suppression si ce département est encore référencé.</p><div class="confirm-actions"><button class="ui-button ui-button--secondary" type="button" (click)="departmentPendingDeletion.set(null)">Annuler</button><button class="ui-button ui-button--primary danger-button" [disabled]="departmentSaving()" type="button" (click)="deleteDepartment()">Supprimer</button></div></app-dialog>}

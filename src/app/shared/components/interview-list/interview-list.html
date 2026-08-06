@@ -1,0 +1,41 @@
+<article class="agenda">
+  <header>
+    <div>
+      <p>Entretiens</p>
+      <h2>Planning partagé</h2>
+    </div>
+    <span>{{ interviews.length }} planifié(s)</span>
+  </header>
+
+  @if(loading){
+    <p>Chargement…</p>
+  }
+
+  @for(interview of interviews; track interview.id){
+    <div class="item">
+      <div class="item-main">
+        <strong>{{ stageLabel(interview) }}</strong>
+        <p>{{ interview.scheduledAt | date:'dd MMM yyyy · HH:mm' }} · {{ typeLabel(interview) }}</p>
+        <small>{{ interview.status }}</small>
+        @if(venueHref(interview); as href){
+          <a class="venue-link" [href]="href" target="_blank" rel="noopener noreferrer">{{ venueLabel(interview) }}</a>
+        } @else if (venueLabel(interview)) {
+          <span class="venue">{{ venueLabel(interview) }}</span>
+        }
+      </div>
+      <div class="interview-actions">
+        @if(showStartButton && (interview.status === 'SCHEDULED' || interview.status === 'RESCHEDULED')){
+          <button class="ui-button ui-button--primary" type="button" (click)="startInterview.emit(interview)">{{ startButtonLabel }}</button>
+        }
+        @if(showResultButton && interview.status === 'IN_PROGRESS'){
+          <button class="ui-button ui-button--primary" type="button" (click)="resultInterview.emit(interview)">{{ resultButtonLabel }}</button>
+        }
+        @if(showCancelButton && interview.status !== 'CANCELLED' && interview.status !== 'COMPLETED'){
+          <button class="ui-button ui-button--secondary cancel" type="button" (click)="cancelInterview.emit(interview)">{{ cancelButtonLabel }}</button>
+        }
+      </div>
+    </div>
+  } @empty {
+    <p class="empty">{{ emptyLabel }}</p>
+  }
+</article>

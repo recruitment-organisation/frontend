@@ -1,0 +1,1 @@
+@if (open()) { <div class="backdrop" (click)="closed.emit()"><section role="dialog" aria-modal="true" [class.dialog-wide]="size() === 'wide'" [attr.aria-label]="title()" (click)="$event.stopPropagation()"><header><h2>{{ title() }}</h2><button type="button" aria-label="Fermer" (click)="closed.emit()">×</button></header><ng-content></ng-content></section></div> }

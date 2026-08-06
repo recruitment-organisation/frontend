@@ -1,0 +1,1 @@
+:host { display: block; }.hr-shell { min-height: 100vh; background: var(--color-bg); }.hr-shell aside { background: #18333a; color: #eff7f5; }.hr-shell main { min-width: 0; }.hr-shell .content { max-width: 90rem; margin: 0 auto; padding: var(--space-6); }

@@ -1,0 +1,9 @@
+<div class="services-page">
+  <section class="services-hero"><p class="eyebrow">Nos expertises</p><h1>La technologie, quand elle répond à un vrai besoin métier.</h1><p>HireFlow met en relation conseil, design, ingénierie et data pour créer des solutions numériques utiles à vos équipes comme à vos clients.</p><div><a routerLink="/contact">Échanger sur votre projet <span>→</span></a><a routerLink="/about">Découvrir notre approche</a></div></section>
+
+  <section class="domains-section"><div class="section-intro"><p class="eyebrow">Domaines d’intervention</p><h2>Une expertise IT complète, activée selon votre contexte.</h2><p>Nous intervenons là où le numérique doit simplifier une opération, ouvrir une nouvelle possibilité ou rendre une décision plus claire.</p></div><div class="domains-grid">@for(domain of domains; track domain.number){<article><span>{{ domain.number }}</span><h3>{{ domain.title }}</h3><p>{{ domain.text }}</p></article>}</div></section>
+
+  <section class="experience-section"><div class="experience-heading"><p class="eyebrow">Notre expérience</p><h2>Des projets menés avec exigence, du premier atelier à l’évolution du produit.</h2><p>Notre expérience repose sur une pratique de terrain : comprendre avant de construire, faire collaborer les bonnes expertises et garder les résultats concrets au centre.</p></div><ol>@for(item of experience; track item.step){<li><span>{{ item.step }}</span><div><h3>{{ item.title }}</h3><p>{{ item.text }}</p></div></li>}</ol></section>
+
+  <section class="services-cta"><div><p class="eyebrow">Un besoin précis ?</p><h2>Commençons par la prochaine décision utile.</h2></div><a routerLink="/contact">Nous contacter <span>→</span></a></section>
+</div>

@@ -1,0 +1,30 @@
+<section class="manager-dashboard">
+  <header class="manager-hero">
+    <div class="hero-intro">
+      <span class="hero-kicker">Espace de décision</span>
+      <h1>Bonjour {{ auth.getCurrentUser()?.firstName || 'Manager' }}.</h1>
+      <p>Suivez les dossiers transmis à l’étape manager et prenez connaissance des indicateurs réels du recrutement.</p>
+      <div class="hero-actions"><a routerLink="/manager/profile" class="ui-button ui-button--light">Mon profil <span>→</span></a><button type="button" class="ui-button ui-button--outline-light" (click)="load()">Actualiser les données</button></div>
+    </div>
+    <aside class="profile-summary"><div class="profile-summary__top"><span class="avatar">{{ initials() }}</span><span class="online"><i></i> Session active</span></div><p>Manager recrutement</p><strong>{{ auth.getCurrentUser()?.firstName }} {{ auth.getCurrentUser()?.lastName }}</strong><small>{{ auth.getCurrentUser()?.email }}</small><a routerLink="/manager/profile">Gérer mon profil <span>→</span></a></aside>
+  </header>
+
+  @if (loading()) {
+    <div class="loading-state"><span></span><span></span><span></span><p>Chargement des données recrutement…</p></div>
+  } @else if (error()) {
+    <div class="error-state"><div><strong>Le dashboard n’est pas disponible.</strong><p>{{ error() }}</p></div><button class="ui-button ui-button--primary" type="button" (click)="load()">Réessayer</button></div>
+  } @else {
+    <section class="metrics" aria-label="Indicateurs de décision"><article><span class="metric-icon violet">◷</span><div><small>À examiner</small><strong>{{ pending() }}</strong><p>À l’étape manager</p></div></article><article><span class="metric-icon green">✓</span><div><small>Recrutées</small><strong>{{ counts().hired }}</strong><p>Décisions finales positives</p></div></article><article><span class="metric-icon amber">◎</span><div><small>Score moyen</small><strong>{{ averageScore() }}<em>/100</em></strong><p>Dossiers transmis au manager</p></div></article></section>
+    <section class="decision-brief"><div><span>Priorité du jour</span><h2>{{ pending() ? pending() + ' dossier(s) à examiner' : 'Aucun dossier en attente de décision' }}</h2><p>Les données proviennent de <code>application-service</code>, <code>candidate-service</code> et <code>job-offer-service</code>. Elles sont mises à jour à chaque actualisation.</p></div><div class="brief-progress"><div><strong>{{ counts().total }}</strong><span>candidatures au total</span></div><div class="progress-track"><i [style.width.%]="counts().total ? (counts().hired / counts().total) * 100 : 0"></i></div><small>{{ counts().hired }} recrutement(s) finalisé(s)</small></div></section>
+    <div class="dashboard-grid" id="finalists">
+      <section class="finalist-section"><header class="section-heading"><div><span>Étape manager</span><h2>Candidats à examiner</h2></div><p>Triés par score de matching décroissant.</p></header><div class="finalist-grid">
+        @for (candidate of finalists(); track candidate.id) {
+          <article class="finalist-card"><header><div class="candidate-id"><span>{{ candidate.name.slice(0, 1) }}</span><div><p>{{ candidate.position }}</p><h3>{{ candidate.name }}</h3></div></div><strong class="score" [style.background]="scoreColor(candidate.score)">@if (candidate.score !== undefined) { {{ candidate.score }}<small>/100</small> } @else { — }</strong></header><div class="score-bar"><i [style.width.%]="candidate.score ?? 0" [style.background]="scoreColor(candidate.score)"></i></div><dl><div><dt>Statut du processus</dt><dd>{{ candidate.status }}</dd></div><div><dt>Dossier</dt><dd>{{ candidate.location }} · @if (candidate.appliedAt) { postulé le {{ candidate.appliedAt | date:'dd/MM/yyyy' }} } @else { date non renseignée }</dd></div></dl><footer><span class="decision">{{ candidate.currentStep || 'Étape non renseignée' }}</span><span class="read-only">Lecture seule</span></footer></article>
+        } @empty {
+          <div class="empty-finalists"><span>✓</span><h3>Aucun dossier à l’étape manager</h3><p>Les candidatures apparaîtront ici lorsqu’elles seront transmises par le processus RH.</p></div>
+        }
+      </div></section>
+      <aside class="decision-guide"><span class="guide-icon">✦</span><p>Cadre de décision</p><h2>Votre lecture du dossier</h2><ol><li><span>01</span><div><strong>Vérifier le score</strong><small>Le score de matching est calculé et stocké dans la candidature.</small></div></li><li><span>02</span><div><strong>Lire le statut</strong><small>Seuls les dossiers à <code>MANAGER_INTERVIEW</code> sont affichés ici.</small></div></li><li><span>03</span><div><strong>Décider dans le workflow</strong><small>La validation métier sera connectée au workflow manager.</small></div></li></ol><div class="guide-note"><strong>Accès manager</strong><span>Le manager peut consulter ces données, sans modifier les candidatures RH.</span></div></aside>
+    </div>
+  }
+</section>

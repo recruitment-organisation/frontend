@@ -1,0 +1,49 @@
+<section class="offers-shell">
+  <app-page-header eyebrow="Opportunités" title="Offres disponibles" description="Recherchez un poste par son titre ou son domaine, puis envoyez votre candidature avec votre CV." />
+
+  <div class="offer-filters" aria-label="Filtrer les offres">
+    <label class="ui-field">Titre
+      <input type="search" [value]="titleFilter()" (input)="titleFilter.set($any($event.target).value)" placeholder="Ex. Développeur" />
+    </label>
+    <label class="ui-field">Domaine
+      <select [value]="domainFilter()" (change)="domainFilter.set($any($event.target).value)">
+        <option value="">Tous les domaines</option>
+        @for (domain of domains(); track domain) { <option [value]="domain">{{ domain }}</option> }
+      </select>
+    </label>
+  </div>
+
+  @if(loading()) { <p class="state">Chargement…</p> }
+  @else if(error()) { <div class="ui-alert ui-alert--error">{{ error() }} <button class="retry" type="button" (click)="load()">Réessayer</button></div> }
+  @else {
+    <p class="offer-result-count">{{ filteredOffers().length }} offre(s) affichée(s)</p>
+    <div class="offers-grid">
+      @for(offer of filteredOffers(); track offer.id) {
+        <article>
+          <p>{{ offer.domain || 'Général' }} · {{ offer.employmentType }} · {{ offer.experienceLevel }}</p>
+          <h2>{{ offer.title }}</h2>
+          <span>{{ offer.location }}</span>
+          <div>{{ offer.description }}</div>
+          <footer>
+            <strong>Clôture : {{ offer.closingDate }}</strong>
+            <button class="ui-button ui-button--primary" type="button" [disabled]="hasApplied(offer)" (click)="openApplicationDialog(offer)">{{ hasApplied(offer) ? 'Déjà postulé' : 'Postuler' }}</button>
+          </footer>
+        </article>
+      } @empty {
+        <p class="state">Aucune offre ne correspond à ces filtres.</p>
+      }
+    </div>
+  }
+</section>
+
+<app-dialog title="Envoyer ma candidature" [open]="!!selectedOffer()" (closed)="closeApplicationDialog()">
+  @if(selectedOffer(); as offer) {
+    <form class="ui-modal-form candidate-application-form" [formGroup]="applicationForm" (ngSubmit)="apply()">
+      <div class="application-summary"><p>Poste sélectionné</p><h2>{{ offer.title }}</h2><span>{{ offer.domain || 'Général' }} · {{ offer.location }} · {{ offer.employmentType }} · {{ offer.experienceLevel }}</span></div>
+      <label class="ui-field">Votre CV (PDF, 10 Mo maximum)<input type="file" accept="application/pdf,.pdf" (change)="selectCv($event)" [disabled]="applying()"/>@if(selectedCv(); as cv){<small>{{ cv.name }}</small>}</label>
+      <label class="confirmation"><input type="checkbox" formControlName="confirm"/><span>Je confirme que les informations et le CV transmis sont exacts.</span></label>
+      @if(applicationError()){<p class="ui-alert ui-alert--error">{{ applicationError() }}</p>}
+      <div class="ui-modal-actions"><button class="ui-button ui-button--secondary" type="button" [disabled]="applying()" (click)="closeApplicationDialog()">Annuler</button><button class="ui-button ui-button--primary" type="submit" [disabled]="applying()">{{ applying() ? 'Envoi en cours…' : 'Envoyer ma candidature' }}</button></div>
+    </form>
+  }
+</app-dialog>

@@ -1,0 +1,20 @@
+<div class="notification-list">
+  @for(notification of notifications; track notification.id) {
+    <article [class.failed]="notification.status === 'FAILED'">
+      <span class="notification-icon" [class]="'notification-icon tone-' + notificationMeta(notification.type).tone" aria-hidden="true">{{ notificationMeta(notification.type).icon }}</span>
+      <div>
+        <header>
+          <div>
+            <span class="notification-kind">{{ notificationMeta(notification.type).label }}</span>
+            <h2>{{ notification.subject }}</h2>
+          </div>
+          <time>{{ notification.createdAt | date:'dd MMM yyyy · HH:mm' }}</time>
+        </header>
+        <p [innerHTML]="renderMessage(notification.message)"></p>
+      </div>
+      <span class="delivery" [class.failed]="notification.status === 'FAILED'">{{ notification.status === 'FAILED' ? 'Échec' : 'Envoyée' }}</span>
+    </article>
+  } @empty {
+    <div class="state"><h2>{{ emptyTitle }}</h2><p>{{ emptyDescription }}</p></div>
+  }
+</div>

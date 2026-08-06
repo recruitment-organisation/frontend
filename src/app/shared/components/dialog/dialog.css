@@ -1,0 +1,11 @@
+.backdrop { position: fixed; z-index: 70; inset: 0; display: grid; place-items: center; padding: var(--space-4); background: rgba(16, 35, 40, .46); animation: backdrop-in var(--transition); }
+section { width: min(680px, 100%); max-height: min(84vh, 760px); overflow: auto; padding: var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); box-shadow: var(--shadow-md); animation: dialog-in var(--transition); }
+section.dialog-wide { width: min(960px, 100%); }
+header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-5); padding-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); }
+h2 { margin: 0; color: var(--color-ink); font-size: 1.18rem; letter-spacing: -.02em; }
+header button { display: grid; place-items: center; width: 2rem; height: 2rem; border: 1px solid var(--color-border); border-radius: 50%; background: var(--color-surface-muted); color: var(--color-ink-soft); font-size: 1.3rem; line-height: 1; cursor: pointer; transition: background var(--transition), color var(--transition); }
+header button:hover { background: var(--color-surface-subtle); color: var(--color-primary-dark); }
+@keyframes backdrop-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes dialog-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 600px) { section { max-height: calc(100vh - 2rem); padding: var(--space-5); } }

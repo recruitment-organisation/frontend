@@ -1,0 +1,23 @@
+<button type="button" class="assistant-launcher" [class.active]="open()" (click)="toggle()" [attr.aria-expanded]="open()" aria-controls="hr-assistant-dialog" aria-label="Ouvrir l’assistant RH">
+  @if(open()){<span aria-hidden="true">×</span>}@else{<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20 11.3A8.2 8.2 0 0 1 11.7 19a9.5 9.5 0 0 1-3.1-.5L4 20l1.5-4.1A7.6 7.6 0 0 1 4 11.3 8.2 8.2 0 0 1 12 3a8.2 8.2 0 0 1 8 8.3Z"/><path d="m8.2 12.7 2.4-2.5 1.8 1.8 3.5-3.7-2.3 3.9-1.8-1.8-3.6 2.3Z"/></svg>}
+  @if(activeFilterCount() !== null && !open()){<i>{{ activeFilterCount() }}</i>}
+</button>
+
+@if(open()){
+  <aside id="hr-assistant-dialog" class="assistant" role="dialog" aria-modal="false" aria-labelledby="assistant-title">
+    <header class="assistant-header">
+      <div class="assistant-identity"><span class="assistant-avatar" aria-hidden="true">✦</span><div><p>Assistant RH · En ligne</p><h2 id="assistant-title">Vos {{ resourceLabel() }}</h2></div></div>
+      <button type="button" class="close" (click)="close()" aria-label="Fermer l’assistant">×</button>
+    </header>
+    @if(activeFilterCount() !== null){<div class="filter-state"><span>{{ activeFilterCount() }} élément(s) filtré(s)</span><button type="button" (click)="clearFilter()">Retirer</button></div>}
+    <div class="messages" aria-live="polite">
+      @for(message of messages(); track $index){
+        <div class="message-row" [class.user]="message.role === 'user'"><div class="message">{{ message.content }}</div></div>
+        @if(message.role === 'assistant' && message.suggestions?.length){<div class="suggestions">@for(suggestion of message.suggestions; track suggestion){<button type="button" (click)="ask(suggestion)">{{ suggestion }}</button>}</div>}
+      }
+      @if(loading()){<div class="message-row"><div class="message pending"><i></i><i></i><i></i></div></div>}
+    </div>
+    <div class="starter-questions">@for(suggestion of starterQuestions(); track suggestion){<button type="button" (click)="ask(suggestion)">{{ suggestion }}</button>}</div>
+    <form (ngSubmit)="ask()"><label class="sr-only" for="hr-assistant-question">Votre question</label><div><input id="hr-assistant-question" name="question" [ngModel]="question()" (ngModelChange)="question.set($event)" [disabled]="loading()" placeholder="Écrivez un message…"/><button type="submit" [disabled]="loading() || !question().trim()" aria-label="Envoyer le message"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m4 4 16 8-16 8 3.6-8L4 4Z"/></svg></button></div></form>
+  </aside>
+}

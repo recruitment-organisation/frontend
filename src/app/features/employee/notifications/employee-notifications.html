@@ -1,0 +1,26 @@
+<section class="employee-notifications">
+  <app-page-header
+    eyebrow="Mes alertes"
+    title="Notifications"
+    description="Retrouvez les messages liés à vos entretiens et au suivi du recrutement."
+  />
+
+  @if(loading()) {
+    <p class="state">Chargement des notifications…</p>
+  } @else if(error()) {
+    <div class="state error"><p>{{ error() }}</p><button type="button" (click)="load()">Réessayer</button></div>
+  } @else {
+    <app-notification-list
+      [notifications]="notifications()"
+      [loading]="loading()"
+      emptyTitle="Aucune notification"
+      emptyDescription="Les messages liés à vos entretiens apparaîtront ici."
+    />
+
+    <div class="pagination">
+      <button type="button" [disabled]="page() === 0" (click)="load(page()-1)">Précédent</button>
+      <span>Page {{ page()+1 }}</span>
+      <button type="button" [disabled]="(page()+1)*pageSize >= total()" (click)="load(page()+1)">Suivant</button>
+    </div>
+  }
+</section>

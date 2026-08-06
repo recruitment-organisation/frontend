@@ -1,0 +1,73 @@
+<section class="profile-shell">
+  <app-page-header
+    [eyebrow]="eyebrow"
+    [title]="title"
+    [description]="description"
+  />
+
+  @if (candidate(); as candidate) {
+    <div class="profile-grid">
+      <article><span>Nom complet</span><strong>{{ candidate.firstName }} {{ candidate.lastName }}</strong></article>
+      <article><span>Email</span><strong>{{ candidate.email }}</strong></article>
+      <article><span>Téléphone</span><strong>{{ candidate.phone || 'Non renseigné' }}</strong></article>
+      <article><span>Localisation</span><strong>{{ candidate.location || 'Non renseignée' }}</strong></article>
+      <article><span>Disponibilité</span><strong>{{ candidate.available ? 'Disponible' : 'Non renseignée' }}</strong></article>
+      <article><span>LinkedIn</span><strong>{{ candidate.linkedinUrl || 'Non renseigné' }}</strong></article>
+    </div>
+  } @else if (employee(); as employee) {
+    <div class="profile-grid">
+      <article>
+        <span>Nom complet</span>
+        <strong>{{ employee.firstName }} {{ employee.lastName }}</strong>
+      </article>
+      <article>
+        <span>Email professionnel</span>
+        <strong>{{ employee.email }}</strong>
+      </article>
+      <article>
+        <span>Téléphone</span>
+        <strong>{{ employee.phone }}</strong>
+      </article>
+      <article>
+        <span>Poste</span>
+        <strong>{{ employee.position }}</strong>
+      </article>
+      <article>
+        <span>Date d'embauche</span>
+        <strong>{{ employee.hireDate | date:'dd/MM/yyyy' }}</strong>
+      </article>
+    </div>
+  } @else if (employeeError()) {
+    <p class="profile-error" role="alert">{{ employeeError() }}</p>
+  }
+
+  @if (auth.getCurrentUser(); as user) {
+    <div class="profile-grid">
+      <article>
+        <span>Nom complet</span>
+        <strong>{{ user.firstName }} {{ user.lastName }}</strong>
+      </article>
+      <article>
+        <span>Nom d'utilisateur</span>
+        <strong>{{ user.username }}</strong>
+      </article>
+      <article>
+        <span>Email</span>
+        <strong>{{ user.email }}</strong>
+      </article>
+      <article>
+        <span>Rôles</span>
+        <strong>{{ user.roles.join(', ') }}</strong>
+      </article>
+    </div>
+  }
+
+  <form class="account-form" [formGroup]="accountForm" (ngSubmit)="updateAccount()">
+    <h2>Compte et sécurité</h2>
+    <p>Modifiez votre mot de passe Keycloak. La modification d’email est désactivée jusqu’à la mise à disposition d’un flux backend qui synchronise Keycloak et le profil métier.</p>
+    <label>Mot de passe<input type="password" formControlName="password" placeholder="Nouveau mot de passe (8 caractères minimum)"/></label>
+    <label>Confirmation<input type="password" formControlName="confirmation" placeholder="Confirmer le mot de passe"/></label>
+    @if(accountError()){<p class="profile-error">{{ accountError() }}</p>} @if(accountSuccess()){<p class="profile-success">{{ accountSuccess() }}</p>}
+    <button class="ui-button ui-button--primary" type="submit">Enregistrer</button>
+  </form>
+</section>

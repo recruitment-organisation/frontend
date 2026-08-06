@@ -1,0 +1,5 @@
+{
+    "terminal.integrated.accessibleViewFocusOnCommandExecution": true,
+    "terminal.integrated.altClickMovesCursor": true,
+    "editor.multiCursorModifier": "ctrlCmd"
+}

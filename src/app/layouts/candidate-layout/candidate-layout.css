@@ -1,0 +1,1 @@
+:host { display: block; }.candidate-shell { min-height: 100vh; background: var(--color-bg); }.candidate-sidebar { background: #18333a; }.candidate-sidebar .workspace-brand span { background: var(--color-accent-soft); color: var(--color-primary-dark); }

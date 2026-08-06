@@ -1,0 +1,129 @@
+<section class="interviews">
+  <app-page-header
+    eyebrow="Planification"
+    title="Entretiens"
+    description="Sélectionnez une candidature et un intervieweur par leur nom, puis planifiez le rendez-vous."
+  />
+
+  <div class="ui-page-actions">
+    <button class="ui-button ui-button--primary" type="button" (click)="openScheduleDialog()">
+      Programmer un entretien
+    </button>
+  </div>
+
+  @if(error()){
+    <p class="message error">{{error()}}</p>
+  }
+  @if(success()){
+    <p class="message success">{{success()}}</p>
+  }
+
+  <app-interview-list
+    [interviews]="interviews()"
+    [loading]="loading()"
+    [showCancelButton]="true"
+    startButtonLabel="Démarrer"
+    resultButtonLabel="Donner le résultat"
+    cancelButtonLabel="Annuler"
+    (startInterview)="start($event)"
+    (resultInterview)="openFeedback($event)"
+    (cancelInterview)="cancel($event)"
+  />
+</section>
+
+<app-dialog title="Programmer un entretien" size="wide" [open]="scheduleDialog()" (closed)="closeScheduleDialog()">
+  <form class="ui-modal-form" [formGroup]="form" (ngSubmit)="schedule()">
+    @if(optionsLoading()){
+      <p class="state">Chargement des candidatures et des intervieweurs…</p>
+    }@else{
+      <div class="ui-form-grid">
+        <label class="ui-field">Rechercher un candidat<input type="search" [value]="candidateSearch()" (input)="filterCandidates($any($event.target).value)" placeholder="Nom ou prénom du candidat"/></label>
+        <label class="ui-field">Candidature<select formControlName="applicationId"><option [ngValue]="0">Sélectionner une candidature</option>@for(application of filteredApplications();track application.id){<option [ngValue]="application.id">{{application.candidateName}} · {{application.offerTitle}}</option>}</select></label>
+        <label class="ui-field">Intervieweur<select formControlName="interviewerId"><option [ngValue]="0">Sélectionner un intervieweur</option>@for(interviewer of interviewers();track interviewer.id){<option [ngValue]="interviewer.id">{{interviewer.firstName}} {{interviewer.lastName}} · {{interviewer.position}}</option>}</select></label>
+        <label class="ui-field">Date et heure<input type="datetime-local" formControlName="scheduledAt"/><small>Choisissez le créneau réel du rendez-vous.</small></label>
+        <label class="ui-field">Durée (minutes)<input type="number" formControlName="duration"/><small>La durée bloque le calendrier interne.</small></label>
+        <label class="ui-field">Mode d’entretien<select formControlName="type">@for(type of types;track type){<option [value]="type">{{type === 'ONSITE' ? 'Présentiel' : type === 'ONLINE' ? 'En ligne' : 'Téléphone'}}</option>}</select><small>Le mode décrit la forme de l’échange, pas l’étape du workflow.</small></label>
+        @if(form.controls.type.value === 'ONLINE'){
+          <label class="ui-field">Lien de réunion<input formControlName="meetingLink" placeholder="https://..."/><small>Utilisé pour un entretien en ligne et repris dans la notification.</small></label>
+        }
+        @if(form.controls.type.value === 'ONSITE'){
+          <label class="ui-field">Lieu<input formControlName="location" placeholder="Salle, adresse ou bâtiment"/><small>Utilisé pour un entretien en présentiel et repris dans la notification.</small></label>
+        }
+      </div>
+      @if(candidateSearch() && !filteredApplications().length){
+        <p class="state">Aucune candidature ne correspond à ce nom.</p>
+      }
+      <label class="ui-field">Notes<textarea rows="4" formControlName="notes"></textarea><small>Ajoutez le contexte RH ou les consignes à transmettre à l’intervieweur.</small></label>
+    }
+    @if(error()){
+      <p class="error">{{error()}}</p>
+    }
+    <div class="ui-modal-actions">
+      <button class="ui-button ui-button--secondary" type="button" (click)="closeScheduleDialog()">Annuler</button>
+      <button class="ui-button ui-button--primary" [disabled]="optionsLoading()" type="submit">Programmer</button>
+    </div>
+  </form>
+</app-dialog>
+
+<app-dialog title="Résultat de l’entretien" [open]="feedbackDialog()" (closed)="closeFeedback()">
+  <form class="ui-modal-form" [formGroup]="feedbackForm" (ngSubmit)="completeInterview()">
+    <label class="ui-field">
+      Décision
+      <select formControlName="result">
+        <option value="PASSED">Approuvé</option>
+        <option value="FAILED">Non approuvé</option>
+      </select>
+      <small>Cette décision est envoyée au workflow et fait avancer ou clôturer le process.</small>
+    </label>
+    <label class="ui-field">
+      Retour d’entretien
+      <textarea rows="4" formControlName="feedback" placeholder="Retour obligatoire pour le candidat"></textarea>
+      <small>Décrivez le déroulé, les points forts, les points faibles et la suite à donner au candidat.</small>
+    </label>
+    <label class="ui-field">
+      Notes internes
+      <textarea rows="3" formControlName="notes"></textarea>
+      <small>Visible seulement par l’équipe RH, pas par le candidat.</small>
+    </label>
+    <div class="ui-modal-actions">
+      <button class="ui-button ui-button--secondary" type="button" (click)="closeFeedback()">Annuler</button>
+      <button class="ui-button ui-button--primary" [disabled]="completing()" type="submit">{{ completing() ? 'Enregistrement…' : 'Enregistrer la décision' }}</button>
+    </div>
+  </form>
+</app-dialog>
+
+<app-dialog title="Planifier l’entretien manager" size="wide" [open]="techScheduleDialog()" (closed)="closeTechScheduleDialog()">
+  @if(techOptionsLoading()){
+    <p class="state">Chargement des données du candidat et des intervieweurs…</p>
+  }@else{
+    @if(techScheduleError()){
+      <p class="error">{{ techScheduleError() }}</p>
+    }
+    @if(techContext();as context){
+      <form class="ui-modal-form" [formGroup]="techForm" (ngSubmit)="scheduleTechInterview()">
+        <p class="state">Candidat : <strong>{{ context.candidateName }}</strong> · Offre : <strong>{{ context.offerTitle }}</strong></p>
+        <p class="state">Étape : <strong>{{ context.application.currentTaskName || 'Manager Interview' }}</strong></p>
+        <p class="state">Le candidat vient d’être approuvé au HR interview. Planifiez maintenant l’entretien manager.</p>
+        <div class="ui-form-grid">
+          <label class="ui-field">Intervieweur<select formControlName="interviewerId"><option [ngValue]="0">Sélectionner un intervieweur</option>@for(interviewer of interviewers();track interviewer.id){<option [ngValue]="interviewer.id">{{interviewer.firstName}} {{interviewer.lastName}} · {{interviewer.position}}</option>}</select><small>Choisissez l’employé qui mènera l’entretien manager.</small></label>
+          <label class="ui-field">Date et heure<input type="datetime-local" formControlName="scheduledAt"/><small>Choisissez la date et l’heure exactes.</small></label>
+          <label class="ui-field">Durée (minutes)<input type="number" min="15" formControlName="duration"/><small>La durée sert à bloquer le créneau dans l’agenda.</small></label>
+          <label class="ui-field">Mode d’entretien<select formControlName="type">@for(type of types;track type){<option [value]="type">{{type === 'ONSITE' ? 'Présentiel' : type === 'ONLINE' ? 'En ligne' : 'Téléphone'}}</option>}</select><small>Le mode décrit la forme de l’échange.</small></label>
+          @if(techForm.controls.type.value === 'ONLINE'){
+            <label class="ui-field">Lien de réunion<input formControlName="meetingLink" placeholder="https://..."/><small>À remplir si l’entretien est en ligne.</small></label>
+          }
+          @if(techForm.controls.type.value === 'ONSITE'){
+            <label class="ui-field">Lieu<input formControlName="location" placeholder="Salle, adresse ou bâtiment"/><small>À remplir si l’entretien est en présentiel.</small></label>
+          }
+        </div>
+        <label class="ui-field">Notes<textarea rows="4" formControlName="notes"></textarea><small>Ajoutez le contexte manager ou les consignes à transmettre à l’intervieweur.</small></label>
+        <div class="ui-modal-actions">
+          <button class="ui-button ui-button--secondary" type="button" (click)="closeTechScheduleDialog()">Annuler</button>
+          <button class="ui-button ui-button--primary" [disabled]="techScheduling()" type="submit">{{ techScheduling() ? 'Planification…' : 'Programmer l’entretien manager' }}</button>
+        </div>
+      </form>
+    }@else{
+      <p class="state">Aucune donnée manager à planifier.</p>
+    }
+  }
+</app-dialog>

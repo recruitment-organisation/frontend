@@ -1,0 +1,9 @@
+<section class="empty-state">
+  <div class="icon"></div>
+  <h2>{{ title() }}</h2>
+  <p>{{ description() }}</p>
+
+  @if (note()) {
+    <span class="note">{{ note() }}</span>
+  }
+</section>

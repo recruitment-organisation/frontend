@@ -1,0 +1,16 @@
+<header class="header" [class.scrolled]="scrolled()">
+  <div class="header-inner">
+    <a routerLink="/" class="brand" (click)="closeMenu()" aria-label="HireFlow Technologies, accueil">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span><strong>HireFlow</strong><small>technologies numériques</small></span>
+    </a>
+    <button class="menu-toggle" type="button" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen()" aria-controls="public-menu" aria-label="Ouvrir le menu de navigation"><span></span><span></span><span></span></button>
+    <nav id="public-menu" class="navigation" [class.open]="menuOpen()" aria-label="Navigation principale">
+      <a routerLink="/" [fragment]="'top'" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">Accueil</a>
+      <a routerLink="/services" routerLinkActive="active" (click)="closeMenu()">Expertises</a>
+      <a routerLink="/about" routerLinkActive="active" (click)="closeMenu()">La société</a>
+      <a routerLink="/contact" routerLinkActive="active" (click)="closeMenu()">Contact</a>
+      <span class="navigation-actions"><a routerLink="/auth/login" class="signup-link" (click)="closeMenu()">Espace sécurisé</a></span>
+    </nav>
+  </div>
+</header>
