@@ -1,33 +1,25 @@
 name: Frontend CI/CD
-
 on:
   push:
     branches:
       - main
     tags:
       - "v*.*.*"
-
   pull_request:
     branches:
       - main
-
 permissions:
   contents: read
-
 env:
   IMAGE_NAME: ihab0/frontend
   NODE_VERSION: "22"
-
 jobs:
-
   ci:
     name: Build Angular application
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout source code
         uses: actions/checkout@v7
-
       - name: Display GitHub context
         shell: bash
         run: |
@@ -36,52 +28,41 @@ jobs:
           echo "Ref name: ${{ github.ref_name }}"
           echo "Ref type: ${{ github.ref_type }}"
           echo "Commit: ${{ github.sha }}"
-
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: package-lock.json
-
       - name: Display Node.js and npm versions
         shell: bash
         run: |
           node --version
           npm --version
-
       - name: Install dependencies
         run: npm ci
-
       - name: Build Angular application
         run: npm run build -- --configuration production
-
       - name: Display generated files
         shell: bash
         run: |
           echo "Generated Angular files:"
           find dist -maxdepth 4 -type f | sort | head -100
 
-  
       - name: Prepare Docker artifact
         if: github.ref_type == 'tag'
         shell: bash
         run: |
           BUILD_DIR="$(find dist -type f -name index.html -printf '%h\n' | head -n 1)"
-
           if [ -z "${BUILD_DIR}" ]; then
             echo "Angular index.html was not found inside dist/"
             exit 1
           fi
-
           echo "Angular build directory: ${BUILD_DIR}"
-
           mkdir -p docker-dist
           cp -a "${BUILD_DIR}/." docker-dist/
-
           echo "Docker artifact content:"
           ls -lah docker-dist
-
       - name: Upload Angular build
         if: github.ref_type == 'tag'
         uses: actions/upload-artifact@v7
@@ -90,92 +71,72 @@ jobs:
           path: docker-dist
           if-no-files-found: error
           retention-days: 1
-
-
   docker:
     name: Publish Docker image
-
     needs:
       - ci
-
     if: >
       github.event_name == 'push' &&
       github.ref_type == 'tag'
-
     runs-on: ubuntu-latest
-
+    outputs:
+      version: ${{ steps.version.outputs.value }}
     steps:
       - name: Checkout source code
         uses: actions/checkout@v7
-
       - name: Download Angular build
         uses: actions/download-artifact@v8
         with:
           name: angular-build
           path: docker-dist
-
       - name: Display downloaded Angular build
         shell: bash
         run: |
           ls -lah docker-dist
-
           if [ ! -f docker-dist/index.html ]; then
             echo "docker-dist/index.html was not found."
             exit 1
           fi
-
       - name: Extract and validate version
         id: version
         shell: bash
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-
           echo "Git tag: ${GITHUB_REF_NAME}"
           echo "Docker version: ${VERSION}"
-
           if [[ ! "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "Invalid version: ${VERSION}"
             echo "Expected format: v1.0.0"
             exit 1
           fi
-
           echo "value=${VERSION}" >> "$GITHUB_OUTPUT"
-
       - name: Generate short commit SHA
         id: commit
         shell: bash
         run: |
           SHORT_SHA="${GITHUB_SHA::7}"
-
           echo "value=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
           echo "Short SHA: ${SHORT_SHA}"
-
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v4
-
       - name: Login to Docker Hub
         uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Verify version does not already exist
         shell: bash
         env:
           VERSION: ${{ steps.version.outputs.value }}
         run: |
           IMAGE="${IMAGE_NAME}:${VERSION}"
-
           echo "Checking Docker image: ${IMAGE}"
-
           if docker manifest inspect "${IMAGE}" > /dev/null 2>&1; then
             echo "Docker image ${IMAGE} already exists."
             echo "Create a new version."
             exit 1
           fi
-
           echo "Version ${VERSION} is available."
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v7
         with:
@@ -192,7 +153,6 @@ jobs:
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
       - name: Publish summary
         shell: bash
         env:
@@ -204,3 +164,42 @@ jobs:
           echo "- Image: \`${IMAGE_NAME}:${VERSION}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- Commit image: \`${IMAGE_NAME}:sha-${SHORT_SHA}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- Git tag: \`${GITHUB_REF_NAME}\`" >> "$GITHUB_STEP_SUMMARY"
+
+  update-gitops:
+    name: Update GitOps repository
+    needs:
+      - docker
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout GitOps repo
+        uses: actions/checkout@v4
+        with:
+          repository: recruitment-organisation/recruitment-gitops
+          token: ${{ secrets.GITOPS_PAT }}
+          path: gitops
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Update image tag in values file
+        env:
+          VERSION: ${{ needs.docker.outputs.version }}
+        run: |
+          cd gitops
+          yq -i '.image.tag = strenv(VERSION)' values/applications/frontend.yaml
+          echo "Nouveau contenu :"
+          cat values/applications/frontend.yaml
+
+      - name: Commit and push
+        env:
+          VERSION: ${{ needs.docker.outputs.version }}
+        run: |
+          cd gitops
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add values/applications/frontend.yaml
+          git commit -m "chore: bump frontend image to ${VERSION}"
+          git push origin main
