@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
 import { HrDashboardComponent } from '../hr/dashboard/hr-dashboard';
+import { HrInterviewsComponent } from '../hr/interviews/hr-interviews';
 import { HrNotificationsComponent } from '../hr/hr-notifications/hr-notifications';
 import { HrRecordsComponent } from '../hr/records/hr-records';
 import { HrComponentsModule } from '../hr/hr-components-module';
@@ -21,6 +22,7 @@ const routes: Routes = [
       { path: 'dashboard', component: HrDashboardComponent },
       { path: 'candidates', component: HrRecordsComponent, data: { mode: 'candidates', readOnly: true } },
       { path: 'applications', component: HrRecordsComponent, data: { mode: 'applications', readOnly: true } },
+      { path: 'interviews', component: HrInterviewsComponent },
       { path: 'notifications', component: HrNotificationsComponent, data: { managerView: true } },
       { path: 'profile', component: ManagerProfileComponent }
     ]

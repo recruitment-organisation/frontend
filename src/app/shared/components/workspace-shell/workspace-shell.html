@@ -1,28 +1,75 @@
 <div class="workspace-shell" [class]="'workspace-shell tone-' + tone()">
   <aside class="sidebar">
-    <span class="sidebar-glow glow-one" aria-hidden="true"></span><span class="sidebar-glow glow-two" aria-hidden="true"></span>
+    <span class="sidebar-glow glow-one" aria-hidden="true"></span
+    ><span class="sidebar-glow glow-two" aria-hidden="true"></span>
     <a [routerLink]="brandLink()" class="workspace-brand">
-      <span class="brand-mark" aria-hidden="true">✦</span>
-      <div><strong>{{ brand() }}</strong><small>{{ subtitle() }}</small></div>
+      <span class="brand-mark" aria-hidden="true"
+        ><svg viewBox="0 0 24 24">
+          <path d="M5 5h6v6H5zM13 5h6v6h-6zM5 13h6v6H5zM13 13h6v6h-6z" /></svg
+      ></span>
+      <div>
+        <strong>{{ brand() }}</strong
+        ><small>{{ subtitle() }}</small>
+      </div>
     </a>
     <p class="nav-label">Navigation</p>
     <nav aria-label="Navigation de l'espace">
       @for (item of items(); track item.link; let index = $index) {
-        <a [routerLink]="item.link" routerLinkActive="active" [class.has-notifications]="item.badge"><span class="nav-index">{{ (index + 1).toString().padStart(2, '0') }}</span><span>{{ item.label }}</span>@if(item.badge){<span class="nav-badge" [attr.aria-label]="item.badge + ' notification(s) non lue(s)'">{{ formatBadge(item.badge) }}</span>}</a>
+        <a [routerLink]="item.link" routerLinkActive="active" [class.has-notifications]="item.badge"
+          ><span class="nav-index">{{ (index + 1).toString().padStart(2, '0') }}</span
+          ><span>{{ item.label }}</span>
+          @if (item.badge) {
+            <span
+              class="nav-badge"
+              [attr.aria-label]="item.badge + ' notification(s) non lue(s)'"
+              >{{ formatBadge(item.badge) }}</span
+            >
+          }
+        </a>
       }
     </nav>
     <footer>
-      <div class="user-card"><span class="user-avatar">{{ initials() }}</span><div><strong>{{ auth.getCurrentUser()?.firstName || auth.getCurrentUser()?.username }}</strong><small>{{ workspaceLabel() }}</small></div></div>
-      <button type="button" (click)="logout()"><span aria-hidden="true">↗</span> Déconnexion</button>
+      <div class="user-card">
+        <span class="user-avatar">{{ initials() }}</span>
+        <div>
+          <strong>{{ auth.getCurrentUser()?.firstName || auth.getCurrentUser()?.username }}</strong
+          ><small>{{ workspaceLabel() }}</small>
+        </div>
+      </div>
+      <button type="button" (click)="logout()">
+        <span aria-hidden="true"
+          ><svg viewBox="0 0 24 24">
+            <path d="M10 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4M15 16l4-4-4-4M19 12H9" /></svg
+        ></span>
+        Déconnexion
+      </button>
     </footer>
   </aside>
   <div class="workspace-main">
     <header class="workspace-topbar">
-      <div><p>{{ workspaceLabel() }}</p><strong>{{ auth.getCurrentUser()?.firstName || auth.getCurrentUser()?.username }}</strong></div>
+      <div>
+        <p>{{ workspaceLabel() }}</p>
+        <strong>{{ auth.getCurrentUser()?.firstName || auth.getCurrentUser()?.username }}</strong>
+      </div>
       <div class="workspace-actions">
-        @if(notificationItem(); as notification) {
-          <a [routerLink]="notification.link" class="notification-trigger" [class.has-unread]="notification.badge" [attr.aria-label]="notification.badge ? notification.badge + ' notification(s) non lue(s)' : 'Aucune notification non lue'">
-            <span class="notification-bell" aria-hidden="true">🔔</span><span class="notification-trigger-label">Notifications</span>@if(notification.badge){<span class="notification-count">{{ formatBadge(notification.badge) }}</span>}
+        @if (notificationItem(); as notification) {
+          <a
+            [routerLink]="notification.link"
+            class="notification-trigger"
+            [class.has-unread]="notification.badge"
+            [attr.aria-label]="
+              notification.badge
+                ? notification.badge + ' notification(s) non lue(s)'
+                : 'Aucune notification non lue'
+            "
+          >
+            <span class="notification-bell" aria-hidden="true"
+              ><svg viewBox="0 0 24 24">
+                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></svg></span
+            ><span class="notification-trigger-label">Notifications</span>
+            @if (notification.badge) {
+              <span class="notification-count">{{ formatBadge(notification.badge) }}</span>
+            }
           </a>
         }
         <a routerLink="/" class="ui-button ui-button--secondary">Voir le site</a>

@@ -7,6 +7,7 @@ import { WorkspaceModule } from '../workspace/workspace-module';
 import { HrDashboardComponent } from './dashboard/hr-dashboard';
 import { HrNotificationsComponent } from './hr-notifications/hr-notifications';
 import { HrInterviewsComponent } from './interviews/hr-interviews';
+import { HrInterviewDetailComponent } from './interview-detail/hr-interview-detail';
 import { HrOffersComponent } from './offers/hr-offers';
 import { HrRecordsComponent } from './records/hr-records';
 import { HrComponentsModule } from './hr-components-module';
@@ -25,6 +26,7 @@ const routes: Routes = [
       { path: 'offers', component: HrOffersComponent },
       { path: 'candidates', component: HrRecordsComponent, data: { mode: 'candidates' } },
       { path: 'applications', component: HrRecordsComponent, data: { mode: 'applications' } },
+      { path: 'interviews/:id', component: HrInterviewDetailComponent },
       { path: 'interviews', component: HrInterviewsComponent },
       { path: 'notifications', component: HrNotificationsComponent }
     ]

@@ -29,14 +29,17 @@
         <option value="PASSED">Approuvé</option>
         <option value="FAILED">Non approuvé</option>
       </select>
+      <small>Cette décision est envoyée au workflow et fait avancer ou clôturer le processus.</small>
     </label>
     <label class="ui-field">
       Retour d’entretien
       <textarea rows="4" formControlName="feedback" placeholder="Retour obligatoire"></textarea>
+      <small>Décrivez le déroulé, les points forts, les points faibles et la suite à donner.</small>
     </label>
     <label class="ui-field">
       Notes internes
       <textarea rows="3" formControlName="notes"></textarea>
+      <small>Ces notes restent réservées à l’équipe de recrutement.</small>
     </label>
     <div class="ui-modal-actions">
       <button class="ui-button ui-button--secondary" type="button" (click)="closeFeedback()">Annuler</button>

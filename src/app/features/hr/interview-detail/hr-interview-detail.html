@@ -1,0 +1,85 @@
+<section class="interview-detail">
+  <a class="back-link" routerLink="/hr/interviews">← Retour aux entretiens</a>
+
+  @if(loading()){
+    <p class="state">Chargement du détail de l’entretien…</p>
+  }@else if(error() && !interview()){
+    <div class="state error"><p>{{ error() }}</p><button class="ui-button ui-button--secondary" type="button" (click)="load()">Réessayer</button></div>
+  }@else if(interview(); as item){
+    @if(context(); as details){
+      <header class="detail-hero">
+        <div><p>{{ stageLabel(item.stage) }}</p><h1>{{ details.candidate.firstName }} {{ details.candidate.lastName }}</h1><span>{{ details.offer.title }}</span></div>
+        <div class="countdown"><small>Prochain rendez-vous</small><strong>{{ remainingTime() }}</strong><span>{{ item.scheduledAt | date:'dd MMM yyyy · HH:mm' }}</span></div>
+      </header>
+
+      @if(error()){
+        <p class="message error">{{ error() }}</p>
+      }
+
+      <div class="detail-grid">
+        <article class="panel candidate-card">
+          <header><span>Candidat</span><h2>Informations personnelles</h2></header>
+          <dl>
+            <div><dt>Nom complet</dt><dd>{{ details.candidate.firstName }} {{ details.candidate.lastName }}</dd></div>
+            <div><dt>Email</dt><dd><a [href]="'mailto:' + details.candidate.email">{{ details.candidate.email }}</a></dd></div>
+            <div><dt>Téléphone</dt><dd>{{ details.candidate.phone || 'Non renseigné' }}</dd></div>
+            <div><dt>Localisation</dt><dd>{{ details.candidate.location || 'Non renseignée' }}</dd></div>
+          </dl>
+        </article>
+
+        <article class="panel interview-card">
+          <header><span>Entretien</span><h2>Informations du rendez-vous</h2></header>
+          <dl>
+            <div><dt>Intervieweur</dt><dd>{{ details.interviewer.firstName }} {{ details.interviewer.lastName }} · {{ details.interviewer.position }}</dd></div>
+            <div><dt>Date</dt><dd>{{ item.scheduledAt | date:'dd MMMM yyyy · HH:mm' }}</dd></div>
+            <div><dt>Durée</dt><dd>{{ item.duration }} minutes</dd></div>
+            <div><dt>Mode</dt><dd>{{ item.type === 'ONLINE' ? 'En ligne' : item.type === 'ONSITE' ? 'Présentiel' : 'Téléphone' }}</dd></div>
+            <div><dt>Statut</dt><dd><span class="status" [attr.data-status]="item.status">{{ statusLabel(item.status) }}</span></dd></div>
+            @if(item.meetingLink){<div><dt>Lien</dt><dd><a [href]="item.meetingLink" target="_blank" rel="noopener noreferrer">Rejoindre l’entretien</a></dd></div>}
+            @if(item.location){<div><dt>Lieu</dt><dd>{{ item.location }}</dd></div>}
+          </dl>
+        </article>
+
+        <article class="panel evaluation-card">
+          <header><span>Évaluation</span><h2>Notes et commentaires</h2></header>
+          <div class="text-block"><small>Notes internes</small><p>{{ item.notes || 'Aucune note interne.' }}</p></div>
+          <div class="text-block"><small>Commentaire / retour</small><p>{{ item.feedback || 'Aucun commentaire enregistré.' }}</p></div>
+          <div class="result"><span>Résultat</span><strong [attr.data-result]="item.result">{{ item.result === 'PASSED' ? 'Approuvé' : item.result === 'FAILED' ? 'Rejeté' : 'En attente' }}</strong></div>
+        </article>
+
+        <article class="panel timeline-card">
+          <header><span>Chronologie</span><h2>Parcours de recrutement</h2></header>
+          <ol class="timeline">
+            @for(step of timeline(); track step.label){
+              <li [attr.data-state]="step.state"><i></i><div><strong>{{ step.label }}</strong><p>{{ step.description }}</p></div></li>
+            }
+          </ol>
+          <p class="current-state">État actuel : <strong>{{ details.application.currentTaskName || details.application.status }}</strong></p>
+        </article>
+      </div>
+
+      <section class="decision-bar" aria-label="Décision de l’entretien">
+        <div><span>Décision RH</span><strong>{{ item.status === 'IN_PROGRESS' ? 'L’entretien est en cours : enregistrez votre décision.' : item.status === 'COMPLETED' ? 'La décision a été enregistrée.' : 'Démarrez l’entretien avant de prendre une décision.' }}</strong></div>
+        <div class="decision-actions">
+          @if(item.status === 'SCHEDULED' || item.status === 'RESCHEDULED'){
+            <button class="ui-button ui-button--secondary" type="button" (click)="start()">Démarrer l’entretien</button>
+          }
+          <button class="ui-button approve" type="button" [disabled]="item.status !== 'IN_PROGRESS'" (click)="openDecision('PASSED')">Approuver</button>
+          <button class="ui-button reject" type="button" [disabled]="item.status !== 'IN_PROGRESS'" (click)="openDecision('FAILED')">Rejeter</button>
+        </div>
+      </section>
+    }
+  }
+</section>
+
+<app-dialog [title]="selectedDecision() === 'PASSED' ? 'Approuver le candidat' : 'Rejeter le candidat'" [open]="decisionDialog()" (closed)="closeDecision()">
+  <form class="ui-modal-form" [formGroup]="decisionForm" (ngSubmit)="saveDecision()">
+    <p class="decision-hint">{{ selectedDecision() === 'PASSED' ? 'La candidature continuera vers la prochaine étape du processus.' : 'La candidature sera clôturée dans le workflow.' }}</p>
+    <label class="ui-field">Évaluation / commentaire<textarea rows="5" formControlName="feedback" placeholder="Points forts, points faibles et décision motivée"></textarea><small>Ce commentaire est obligatoire.</small></label>
+    <label class="ui-field">Notes internes<textarea rows="3" formControlName="notes" placeholder="Informations réservées à l’équipe recrutement"></textarea></label>
+    <div class="ui-modal-actions">
+      <button class="ui-button ui-button--secondary" type="button" (click)="closeDecision()">Annuler</button>
+      <button class="ui-button" [class.approve]="selectedDecision() === 'PASSED'" [class.reject]="selectedDecision() === 'FAILED'" [disabled]="saving()" type="submit">{{ saving() ? 'Enregistrement…' : selectedDecision() === 'PASSED' ? 'Confirmer l’approbation' : 'Confirmer le rejet' }}</button>
+    </div>
+  </form>
+</app-dialog>

@@ -13,6 +13,7 @@ export class HrData {
   };
 
   employees(page = 0, size = 20) { return this.http.get<PageResponse<Employee>>(`${this.base}employee-service/employee/getall`, { params: this.pageParams(page, size) }); }
+  employee(id: number) { return this.http.get<Employee>(`${this.base}employee-service/employee/get/${id}`); }
   currentEmployee() { return this.http.get<Employee>(`${this.base}employee-service/employee/me`); }
   departments(page = 0, size = 100) { return this.http.get<PageResponse<Department>>(`${this.base}employee-service/department/getall`, { params: this.pageParams(page, size) }); }
   createDepartment(department: Pick<Department, 'name' | 'description'>) { return this.http.post<Department>(`${this.base}employee-service/department/create`, department); }
@@ -42,6 +43,8 @@ export class HrData {
   createOffer(offer: JobOffer) { return this.http.post<JobOffer>(`${this.base}job-offer-service/job-offers/create`, offer); }
   updateOffer(id: number, offer: JobOffer) { return this.http.put<JobOffer>(`${this.base}job-offer-service/job-offers/update/${id}`, offer); }
   interviews(page = 0, size = 50) { return this.http.get<PageResponse<Interview>>(`${this.base}interview-service/interviews`, { params: this.pageParams(page, size) }); }
+  interview(id: number) { return this.http.get<Interview>(`${this.base}interview-service/interviews/${id}`); }
+  interviewsByApplication(applicationId: number, page = 0, size = 50) { return this.http.get<PageResponse<Interview>>(`${this.base}interview-service/interviews/application/${applicationId}`, { params: this.pageParams(page, size) }); }
   interviewsByInterviewer(interviewerId: number, page = 0, size = 50) { return this.http.get<PageResponse<Interview>>(`${this.base}interview-service/interviews/interviewer/${interviewerId}`, { params: this.pageParams(page, size) }); }
   interviewsByStatus(status: InterviewStatus, page = 0, size = 50) { return this.http.get<PageResponse<Interview>>(`${this.base}interview-service/interviews/status/${status}`, { params: this.pageParams(page, size) }); }
   createInterview(interview: Interview) { return this.http.post<Interview>(`${this.base}interview-service/interviews`, interview); }

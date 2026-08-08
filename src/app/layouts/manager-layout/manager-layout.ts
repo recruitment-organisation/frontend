@@ -14,6 +14,7 @@ export class ManagerLayoutComponent {
     { label: 'Tableau de bord', link: '/manager/dashboard' },
     { label: 'Candidats', link: '/manager/candidates' },
     { label: 'Candidatures', link: '/manager/applications' },
+    { label: 'Entretiens', link: '/manager/interviews' },
     { label: 'Notifications', link: '/manager/notifications' },
     { label: 'Mon profil', link: '/manager/profile' }
   ];

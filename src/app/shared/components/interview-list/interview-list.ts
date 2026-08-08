@@ -16,12 +16,14 @@ export class InterviewListComponent {
   @Input() showCancelButton = false;
   @Input() showStartButton = true;
   @Input() showResultButton = true;
+  @Input() showDetailsButton = false;
   @Input() startButtonLabel = 'Démarrer';
   @Input() resultButtonLabel = 'Résultat';
   @Input() cancelButtonLabel = 'Annuler';
   @Output() startInterview = new EventEmitter<Interview>();
   @Output() resultInterview = new EventEmitter<Interview>();
   @Output() cancelInterview = new EventEmitter<Interview>();
+  @Output() viewInterview = new EventEmitter<Interview>();
 
   stageLabel(interview: Interview): string {
     switch (interview.stage) {

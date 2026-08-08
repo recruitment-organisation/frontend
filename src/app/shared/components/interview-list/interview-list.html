@@ -24,6 +24,9 @@
         }
       </div>
       <div class="interview-actions">
+        @if(showDetailsButton){
+          <button class="ui-button ui-button--secondary" type="button" (click)="viewInterview.emit(interview)">Voir le détail</button>
+        }
         @if(showStartButton && (interview.status === 'SCHEDULED' || interview.status === 'RESCHEDULED')){
           <button class="ui-button ui-button--primary" type="button" (click)="startInterview.emit(interview)">{{ startButtonLabel }}</button>
         }
