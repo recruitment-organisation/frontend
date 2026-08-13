@@ -9,8 +9,9 @@ import { HrInterviewsComponent } from './interviews/hr-interviews';
 import { HrInterviewDetailComponent } from './interview-detail/hr-interview-detail';
 import { HrOffersComponent } from './offers/hr-offers';
 import { HrRecordsComponent } from './records/hr-records';
+import { HrRolesComponent } from './roles/hr-roles';
 
-const HR_COMPONENTS = [HrDashboardComponent, HrNotificationsComponent, HrInterviewsComponent, HrInterviewDetailComponent, HrOffersComponent, HrRecordsComponent];
+const HR_COMPONENTS = [HrDashboardComponent, HrNotificationsComponent, HrInterviewsComponent, HrInterviewDetailComponent, HrOffersComponent, HrRecordsComponent, HrRolesComponent];
 
 @NgModule({
   declarations: HR_COMPONENTS,

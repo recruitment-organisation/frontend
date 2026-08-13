@@ -8,6 +8,7 @@ export class HrLayoutComponent {
   private readonly router = inject(Router);
   readonly items: WorkspaceNavItem[] = [
     { label: 'Tableau de bord', link: '/hr/dashboard' }, { label: 'Mon profil', link: '/hr/profile' }, { label: 'Employés', link: '/hr/employees' },
+    { label: 'Rôles', link: '/hr/roles' },
     { label: 'Offres', link: '/hr/offers' }, { label: 'Candidats', link: '/hr/candidates' }, { label: 'Candidatures', link: '/hr/applications' }, { label: 'Entretiens', link: '/hr/interviews' }, { label: 'Notifications', link: '/hr/notifications' }
   ];
 

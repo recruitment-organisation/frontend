@@ -1,0 +1,73 @@
+<section class="roles-page">
+  <app-page-header
+    eyebrow="Administration RH"
+    title="Rôles des employés"
+    description="Créez les rôles métier utilisés lors de l’ajout et de l’affectation des employés."
+  />
+
+  <div class="ui-page-actions">
+    <button class="ui-button ui-button--primary" type="button" (click)="openCreateDialog()">
+      Créer un rôle
+    </button>
+  </div>
+
+  @if (error() && !dialogOpen()) {
+    <p class="message error" role="alert">{{ error() }}</p>
+  }
+
+  <article class="roles-card">
+    <header>
+      <div>
+        <p>Référentiel RH</p>
+        <h2>Rôles disponibles</h2>
+      </div>
+      <span>{{ visibleRoles().length }} rôle(s)</span>
+    </header>
+
+    @if (loading()) {
+      <p class="state">Chargement des rôles…</p>
+    } @else {
+      <div class="roles-grid">
+        @for (role of visibleRoles(); track role.id) {
+          <article class="role-card">
+            <span class="role-icon" aria-hidden="true">{{ role.name.slice(0, 1).toUpperCase() }}</span>
+            <div>
+              <h3>{{ role.name }}</h3>
+              <p>{{ role.description || 'Aucune description renseignée.' }}</p>
+            </div>
+          </article>
+        } @empty {
+          <p class="state">Aucun rôle disponible. Créez le premier rôle du référentiel.</p>
+        }
+      </div>
+    }
+  </article>
+</section>
+
+<app-dialog title="Créer un rôle" [open]="dialogOpen()" (closed)="closeDialog()">
+  <form class="ui-modal-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <label class="ui-field">
+      Nom du rôle
+      <input formControlName="name" maxlength="100" autocomplete="off" placeholder="Ex. RECRUTEUR" />
+      @if (form.controls.name.touched && form.controls.name.hasError('required')) {
+        <small class="field-error">Le nom du rôle est obligatoire.</small>
+      }
+    </label>
+
+    <label class="ui-field">
+      Description
+      <textarea formControlName="description" maxlength="500" rows="4" placeholder="Décrivez les responsabilités associées à ce rôle."></textarea>
+    </label>
+
+    @if (error()) {
+      <p class="message error" role="alert">{{ error() }}</p>
+    }
+
+    <div class="ui-modal-actions">
+      <button class="ui-button ui-button--secondary" type="button" [disabled]="submitting()" (click)="closeDialog()">Annuler</button>
+      <button class="ui-button ui-button--primary" type="submit" [disabled]="submitting()">
+        {{ submitting() ? 'Création…' : 'Créer le rôle' }}
+      </button>
+    </div>
+  </form>
+</app-dialog>
