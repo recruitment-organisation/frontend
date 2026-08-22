@@ -15,7 +15,7 @@
         <article tabindex="0" role="button" (click)="open(application)" (keydown.enter)="open(application)">
           <div class="application-id">✓</div>
           <div>
-            <h2>Candidature envoyée</h2>
+            <h2>{{ application.processInstanceId ? 'Candidature envoyée' : 'Candidature à finaliser' }}</h2>
             <p>Envoyée le {{ application.appliedAt | date:'dd/MM/yyyy' }}</p>
           </div>
           <app-status-badge [status]="application.status"/>
@@ -48,7 +48,7 @@
       <section class="workflow-tracking">
         <header><div><span class="eyebrow">Workflow</span><h4>Votre parcours</h4></div><span class="workflow-state">{{ application.processInstanceId ? (isWorkflowFinished(application) ? 'Terminé' : 'Processus en cours') : 'Non démarré' }}</span></header>
         @if (!application.processInstanceId) {
-          <p>Le processus démarrera dès que votre candidature sera soumise.</p>
+          <div class="workflow-retry"><div><strong>Le workflow n’a pas encore démarré</strong><p>Votre CV est enregistré. Relancez la soumission sans recréer la candidature.</p></div><button class="ui-button ui-button--primary" type="button" [disabled]="!application.cvId || resubmittingId() !== null" (click)="retrySubmission(application)">{{ resubmittingId() === application.id ? 'Démarrage…' : 'Relancer la soumission' }}</button></div>
         } @else if (isWorkflowFinished(application)) {
           <p class="workflow-finished">{{ workflowCompletionMessage(application) }}</p>
         } @else {

@@ -26,7 +26,7 @@
           <div>{{ offer.description }}</div>
           <footer>
             <strong>Clôture : {{ offer.closingDate }}</strong>
-            <button class="ui-button ui-button--primary" type="button" [disabled]="hasApplied(offer)" (click)="openApplicationDialog(offer)">{{ hasApplied(offer) ? 'Déjà postulé' : 'Postuler' }}</button>
+            <div class="offer-actions"><button class="ui-button ui-button--secondary" type="button" (click)="openOfferDetails(offer)">Voir les détails</button><button class="ui-button ui-button--primary" type="button" [disabled]="hasApplied(offer)" (click)="openApplicationDialog(offer)">{{ hasApplied(offer) ? 'Déjà postulé' : 'Postuler' }}</button></div>
           </footer>
         </article>
       } @empty {
@@ -35,6 +35,20 @@
     </div>
   }
 </section>
+
+<app-dialog title="Détails de l’offre" size="wide" [open]="!!detailOffer()" (closed)="closeOfferDetails()">
+  @if(detailOffer(); as offer) {
+    <article class="offer-details">
+      <header><p>{{ offer.domain || 'Général' }}</p><h2>{{ offer.title }}</h2><span>{{ offer.location }} · {{ offer.employmentType }} · {{ offer.experienceLevel }}</span></header>
+      <section><h3>Description du poste</h3><p>{{ offer.description }}</p></section>
+      <div class="offer-detail-grid">
+        <section><h3>Exigences</h3><ul>@for(item of offer.requirements; track item.id ?? $index){<li>{{ item.requirement }}</li>} @empty {<li>Aucune exigence renseignée.</li>}</ul></section>
+        <section><h3>Compétences recherchées</h3><ul>@for(item of offer.skills; track item.id ?? $index){<li>{{ item.skillName }} @if(item.mandatory){<strong>Obligatoire</strong>}</li>} @empty {<li>Aucune compétence renseignée.</li>}</ul></section>
+      </div>
+      <footer><span>Offre ouverte du {{ offer.openingDate }} au {{ offer.closingDate }}</span><button class="ui-button ui-button--primary" type="button" [disabled]="hasApplied(offer)" (click)="applyFromDetails(offer)">{{ hasApplied(offer) ? 'Déjà postulé' : 'Postuler à cette offre' }}</button></footer>
+    </article>
+  }
+</app-dialog>
 
 <app-dialog title="Envoyer ma candidature" [open]="!!selectedOffer()" (closed)="closeApplicationDialog()">
   @if(selectedOffer(); as offer) {

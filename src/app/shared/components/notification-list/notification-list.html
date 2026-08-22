@@ -1,6 +1,6 @@
 <div class="notification-list">
   @for(notification of notifications; track notification.id) {
-    <article [class.failed]="notification.status === 'FAILED'">
+    <article [class.failed]="notification.status === 'FAILED' || notification.status === 'EMAIL_FAILED'">
       <span class="notification-icon" [class]="'notification-icon tone-' + notificationMeta(notification.type).tone" aria-hidden="true">{{ notificationMeta(notification.type).icon }}</span>
       <div>
         <header>
@@ -12,7 +12,7 @@
         </header>
         <p [innerHTML]="renderMessage(notification.message)"></p>
       </div>
-      <span class="delivery" [class.failed]="notification.status === 'FAILED'">{{ notification.status === 'FAILED' ? 'Échec' : 'Envoyée' }}</span>
+      <span class="delivery" [class.failed]="notification.status === 'FAILED' || notification.status === 'EMAIL_FAILED'">{{ notification.status === 'EMAIL_FAILED' ? 'E-mail en échec' : notification.status === 'FAILED' ? 'Échec' : 'Envoyée' }}</span>
     </article>
   } @empty {
     <div class="state"><h2>{{ emptyTitle }}</h2><p>{{ emptyDescription }}</p></div>

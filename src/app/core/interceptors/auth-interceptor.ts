@@ -1,44 +1,80 @@
-import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, switchMap, throwError } from 'rxjs';
+import {
+  Observable,
+  catchError,
+  finalize,
+  shareReplay,
+  switchMap,
+  throwError
+} from 'rxjs';
+import { LoginResponse } from '../models/auth/login-response';
 import { Auth } from '../services/auth';
 
-export const authInterceptor: HttpInterceptorFn = (req, next) => {
+let refreshInFlight$: Observable<LoginResponse> | null = null;
+
+function addBearerToken(
+  request: HttpRequest<unknown>,
+  token: string
+): HttpRequest<unknown> {
+  return request.clone({
+    setHeaders: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+}
+
+function refreshSessionOnce(authService: Auth): Observable<LoginResponse> {
+  if (!refreshInFlight$) {
+    refreshInFlight$ = authService.refreshToken().pipe(
+      catchError(error => {
+        authService.logout();
+        return throwError(() => error);
+      }),
+      finalize(() => {
+        refreshInFlight$ = null;
+      }),
+      shareReplay({
+        bufferSize: 1,
+        refCount: false
+      })
+    );
+  }
+
+  return refreshInFlight$;
+}
+
+export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const authService = inject(Auth);
   const router = inject(Router);
 
   const isAuthRequest =
-    req.url.includes('/login') ||
-    req.url.includes('/refresh-token') ||
-    req.url.includes('/logout');
+    request.url.includes('/login') ||
+    request.url.includes('/refresh-token') ||
+    request.url.includes('/logout');
 
-  let authReq = req;
+  const requestToken = isAuthRequest ? null : authService.getToken();
+  const authenticatedRequest = requestToken
+    ? addBearerToken(request, requestToken)
+    : request;
 
-  if (!isAuthRequest) {
-    const token = authService.getToken();
-
-    if (token) {
-      authReq = req.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-    }
-  }
-
-  return next(authReq).pipe(
+  return next(authenticatedRequest).pipe(
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401 && !isAuthRequest) {
-        return authService.refreshToken().pipe(
+        const currentToken = authService.getToken();
+
+        if (currentToken && currentToken !== requestToken) {
+          return next(addBearerToken(request, currentToken));
+        }
+
+        return refreshSessionOnce(authService).pipe(
           switchMap(() => {
             const refreshedToken = authService.getToken();
+
             if (!refreshedToken) return throwError(() => error);
-            return next(req.clone({ setHeaders: { Authorization: `Bearer ${refreshedToken}` } }));
-          }),
-          catchError(refreshError => {
-            authService.logout();
-            return throwError(() => refreshError);
+
+            return next(addBearerToken(request, refreshedToken));
           })
         );
       }

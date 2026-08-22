@@ -17,6 +17,7 @@ export class NotificationListComponent {
 
   notificationMeta(type: CandidateNotificationType): { icon: string; label: string; tone: string } {
     switch (type) {
+      case 'OFFER_ACCEPTED': return { icon: '✓', label: 'Offre acceptée', tone: 'positive' };
       case 'WELCOME': return { icon: '✦', label: 'Bienvenue', tone: 'positive' };
       case 'INTERVIEW_SCHEDULED': return { icon: '◷', label: 'Entretien', tone: 'primary' };
       case 'CV_REVISION_REQUIRED': return { icon: '↻', label: 'Action requise', tone: 'warning' };

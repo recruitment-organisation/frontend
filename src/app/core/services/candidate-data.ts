@@ -44,6 +44,10 @@ export class CandidateData {
     );
   }
 
+  submitApplication(applicationId: number): Observable<Application> {
+    return this.http.post<Application>(`${this.base}application-service/applications/${applicationId}/submit`, {});
+  }
+
   replaceCv(application: Application, file: File): Observable<void> {
     return this.uploadCv(application.id, file).pipe(
       switchMap(() => this.isCvRevisionTask(application) && application.currentTaskId

@@ -16,7 +16,7 @@ interface WorkflowStep {
 @Component({ selector: 'app-candidate-applications', standalone: false, templateUrl: './candidate-applications.html', styleUrl: './candidate-applications.css', changeDetection: ChangeDetectionStrategy.OnPush })
 export class CandidateApplicationsComponent {
   private readonly api = inject(CandidateData); private readonly destroyRef = inject(DestroyRef); private readonly snackbar = inject(Snackbar);
-  readonly applications = signal<Application[]>([]); readonly selected = signal<Application | null>(null); readonly workflowTask = signal<WorkflowTask | null>(null); readonly workflowTaskLoading = signal(false); readonly workflowTaskError = signal(''); readonly updatingCv = signal(false); readonly loading = signal(true); readonly error = signal(''); readonly success = signal(''); readonly page = signal(0); readonly total = signal(0); readonly now = signal(Date.now()); readonly pageSize = 20;
+  readonly applications = signal<Application[]>([]); readonly selected = signal<Application | null>(null); readonly workflowTask = signal<WorkflowTask | null>(null); readonly workflowTaskLoading = signal(false); readonly workflowTaskError = signal(''); readonly updatingCv = signal(false); readonly resubmittingId = signal<number | null>(null); readonly loading = signal(true); readonly error = signal(''); readonly success = signal(''); readonly page = signal(0); readonly total = signal(0); readonly now = signal(Date.now()); readonly pageSize = 20;
   readonly workflowSteps: readonly WorkflowStep[] = [
     { key: 'submitted', label: 'Candidature transmise', description: 'Votre dossier et votre CV ont été reçus.' },
     { key: 'cv-validation', label: 'Validation du CV', description: 'Le format et les informations du CV sont vérifiés.' },
@@ -64,6 +64,26 @@ export class CandidateApplicationsComponent {
       error: () => {
         this.updatingCv.set(false);
         this.error.set('La mise à jour ou la reprise du workflow a échoué.');
+      }
+    });
+  }
+
+  retrySubmission(application: Application): void {
+    if (!application.cvId || application.processInstanceId || this.resubmittingId() !== null) return;
+    this.resubmittingId.set(application.id);
+    this.error.set('');
+    this.api.submitApplication(application.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: submitted => {
+        this.resubmittingId.set(null);
+        this.applications.update(items => items.map(item => item.id === submitted.id ? submitted : item));
+        this.selected.set(submitted);
+        this.loadWorkflowTask(submitted);
+        this.snackbar.success('Candidature soumise : le workflow a démarré.');
+      },
+      error: () => {
+        this.resubmittingId.set(null);
+        this.error.set('La soumission du workflow a échoué. Réessayez dans quelques instants.');
+        this.snackbar.error('Impossible de démarrer le workflow.');
       }
     });
   }

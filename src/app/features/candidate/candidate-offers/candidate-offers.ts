@@ -25,6 +25,7 @@ export class CandidateOffersComponent {
   readonly offers = signal<JobOffer[]>([]);
   readonly loading = signal(true);
   readonly error = signal('');
+  readonly detailOffer = signal<JobOffer | null>(null);
   readonly selectedOffer = signal<JobOffer | null>(null);
   readonly selectedCv = signal<File | null>(null);
   readonly applicationError = signal('');
@@ -60,6 +61,19 @@ export class CandidateOffersComponent {
     this.selectedCv.set(null);
     this.applicationForm.reset({ confirm: false });
     this.selectedOffer.set(offer);
+  }
+
+  openOfferDetails(offer: JobOffer): void {
+    this.detailOffer.set(offer);
+  }
+
+  closeOfferDetails(): void {
+    this.detailOffer.set(null);
+  }
+
+  applyFromDetails(offer: JobOffer): void {
+    this.closeOfferDetails();
+    this.openApplicationDialog(offer);
   }
 
   closeApplicationDialog(): void {

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
+import { catchError, finalize, forkJoin, map, of, switchMap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HrData } from '../../../core/services/hr-data';
 import { Application, Candidate, CreateEmployeeRequest, CvFile, CvRecommendation, Department, Employee, EmployeeRole, HrAssistantScope, Interview, InterviewType, JobOffer, WorkflowTask } from '../../../core/models/hr';
@@ -23,10 +23,23 @@ type PendingApplicationAction = { kind: 'accept' | 'reject' | 'delete'; row: Row
 export class HrRecordsComponent {
   private readonly api = inject(HrData); private readonly route = inject(ActivatedRoute); private readonly destroyRef = inject(DestroyRef); private readonly changeDetectorRef = inject(ChangeDetectorRef); private readonly fb = inject(FormBuilder); private readonly snackbar = inject(Snackbar);
   readonly mode = this.route.snapshot.data['mode'] as Mode; readonly isReadOnly = this.route.snapshot.data['readOnly'] === true; readonly page = signal(0); readonly total = signal(0); readonly loading = signal(false); readonly error = signal(''); readonly query = signal(''); readonly offerFilter = signal(''); readonly domainFilter = signal(''); readonly sort = signal<'appliedAt' | 'matchingScore'>('appliedAt'); readonly rows = signal<Row[]>([]); readonly assistantFilterIds = signal<number[] | null>(null); readonly applicationView = signal<ApplicationView>('all');
-  readonly departments = signal<Department[]>([]); readonly employeeRoles = signal<EmployeeRole[]>([]); readonly employeeError = signal(''); readonly employeeSuccess = signal('');
+  readonly departments = signal<Department[]>([]); readonly employeeRoles = signal<EmployeeRole[]>([]); readonly employeeError = signal(''); readonly employeeSuccess = signal(''); readonly employeeOptionsLoading = signal(false); readonly employeeSubmitting = signal(false);
   readonly selected = signal<Row | null>(null); readonly recommendation = signal<{ applicationId: number; result: CvRecommendation } | null>(null); readonly recommendationLoading = signal<number | null>(null); readonly recommendationError = signal(''); readonly employeeDialog = signal(false);
   readonly scheduleDialog = signal(false); readonly schedulingRow = signal<Row | null>(null); readonly currentHr = signal<Employee | null>(null); readonly scheduling = signal(false); readonly scheduleError = signal(''); readonly acceptingApplicationId = signal<number | null>(null); readonly deletingApplicationIds = signal<ReadonlySet<number>>(new Set()); readonly deletingDisplayedApplications = signal(false); readonly pendingApplicationAction = signal<PendingApplicationAction | null>(null); readonly pendingDisplayedDeletion = signal(false);
-  readonly employeeForm = this.fb.nonNullable.group({ firstName: ['', Validators.required], lastName: ['', Validators.required], email: ['', [Validators.required, Validators.email]], password: ['', [Validators.required, Validators.minLength(8)]], phone: ['', Validators.required], hireDate: ['', Validators.required], position: ['', Validators.required], roleId: [0, Validators.min(1)], departmentId: [0, Validators.min(1)] });
+  readonly employeeForm = this.fb.nonNullable.group({
+    firstName: ['', Validators.required],
+    lastName: ['', Validators.required],
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [
+      Validators.required,
+      Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,128}$/)
+    ]],
+    phone: ['', [Validators.required, Validators.pattern(/^\+?[0-9]{8,15}$/)]],
+    hireDate: ['', Validators.required],
+    position: ['', Validators.required],
+    roleId: [0, Validators.min(1)],
+    departmentId: [0, Validators.min(1)]
+  });
   readonly interviewTypes: InterviewType[] = ['ONLINE', 'ONSITE', 'PHONE'];
   readonly hrInterviewForm = this.fb.nonNullable.group({ scheduledAt: ['', Validators.required], duration: [60, [Validators.required, Validators.min(15)]], type: ['ONLINE' as InterviewType, Validators.required], meetingLink: [''], location: [''], notes: [''] });
   readonly title = ({ employees: 'Employés', managers: 'Managers', candidates: 'Candidats', applications: 'Candidatures', interviews: 'Entretiens' } as const)[this.mode];
@@ -230,9 +243,83 @@ export class HrRecordsComponent {
     });
   }
   scoreGradient(score?: number): string { if (score === undefined || score === null) return '#8a9bb8'; return score >= 70 ? '#1d4ed8' : score >= 50 ? '#4f7fe4' : '#6f81a3'; }
-  openEmployeeDialog(): void { this.employeeError.set(''); this.employeeDialog.set(true); }
-  closeEmployeeDialog(): void { this.employeeDialog.set(false); this.employeeError.set(''); this.employeeForm.reset({ roleId: 0, departmentId: 0 }); }
-  createEmployee(): void { if (this.employeeForm.invalid) { this.employeeForm.markAllAsTouched(); return; } this.employeeError.set(''); this.api.createEmployee(this.employeeForm.getRawValue() as CreateEmployeeRequest).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({ next: () => { this.employeeSuccess.set(''); this.closeEmployeeDialog(); this.snackbar.success('Employé créé et compte Keycloak initialisé.'); this.load(0); }, error: (response: HttpErrorResponse) => this.employeeError.set(response.status === 409 ? 'Cet email, ce numéro de téléphone ou ce profil est déjà utilisé.' : 'La création de l’employé a échoué.') }); }
+  openEmployeeDialog(): void {
+    this.employeeError.set('');
+    this.employeeDialog.set(true);
+
+    if (this.employeeRoles().length && this.departments().length) return;
+
+    this.employeeOptionsLoading.set(true);
+    forkJoin({ roles: this.api.roles(), departments: this.api.departments() }).pipe(
+      finalize(() => this.employeeOptionsLoading.set(false)),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: data => {
+        this.employeeRoles.set(data.roles.content);
+        this.departments.set(data.departments.content);
+        if (!data.roles.content.length || !data.departments.content.length) {
+          this.employeeError.set('Créez au moins un rôle et un département avant d’ajouter un employé.');
+        }
+      },
+      error: () => this.employeeError.set('Impossible de charger les rôles et les départements. Réessayez après reconnexion.')
+    });
+  }
+
+  closeEmployeeDialog(): void {
+    if (this.employeeSubmitting()) return;
+    this.employeeDialog.set(false);
+    this.employeeError.set('');
+    this.employeeForm.reset({ roleId: 0, departmentId: 0 });
+  }
+
+  createEmployee(): void {
+    if (this.employeeSubmitting()) return;
+
+    if (this.employeeOptionsLoading()) {
+      this.employeeError.set('Attendez la fin du chargement des rôles et des départements.');
+      return;
+    }
+
+    if (this.employeeForm.invalid) {
+      this.employeeForm.markAllAsTouched();
+      this.employeeError.set('Vérifiez les champs signalés avant de créer l’employé.');
+      return;
+    }
+
+    const raw = this.employeeForm.getRawValue();
+    const request: CreateEmployeeRequest = {
+      ...raw,
+      firstName: raw.firstName.trim(),
+      lastName: raw.lastName.trim(),
+      email: raw.email.trim(),
+      phone: raw.phone.trim(),
+      position: raw.position.trim()
+    };
+
+    this.employeeError.set('');
+    this.employeeSubmitting.set(true);
+    this.api.createEmployee(request).pipe(
+      finalize(() => this.employeeSubmitting.set(false)),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: () => {
+        this.employeeSubmitting.set(false);
+        this.employeeSuccess.set('');
+        this.closeEmployeeDialog();
+        this.snackbar.success('Employé créé et compte Keycloak initialisé.');
+        this.load(0);
+      },
+      error: (response: HttpErrorResponse) => this.employeeError.set(this.employeeCreationError(response))
+    });
+  }
+
+  private employeeCreationError(response: HttpErrorResponse): string {
+    if (response.status === 400) return 'Les données sont invalides. Vérifiez notamment le téléphone et le mot de passe.';
+    if (response.status === 401) return 'Votre session a expiré. Reconnectez-vous puis réessayez.';
+    if (response.status === 403) return 'Seul un utilisateur RH peut créer un employé.';
+    if (response.status === 409) return 'Cet email, ce numéro de téléphone ou ce profil est déjà utilisé.';
+    return 'La création de l’employé a échoué.';
+  }
   private matchesApplicationView(row: Row): boolean {
     if (this.mode !== 'applications' || !row.application) return true;
     if (this.applicationView() === 'candidates') return row.application.status === 'SUBMITTED';

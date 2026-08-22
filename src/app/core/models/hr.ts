@@ -21,8 +21,8 @@ export type InterviewStage = 'HR_INTERVIEW' | 'TECHNICAL_INTERVIEW' | 'MANAGER_I
 export type InterviewStatus = 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | 'RESCHEDULED';
 export interface Interview { id?: number; applicationId: number; interviewerId: number; scheduledAt: string; duration: number; type: InterviewType; stage?: InterviewStage; status?: InterviewStatus; meetingLink?: string; location?: string; notes?: string; feedback?: string; approved?: boolean; result?: 'PASSED' | 'FAILED' | 'PENDING'; }
 export interface CvFile { id: number; fileName: string; fileType: string; active: boolean; uploadedAt?: string; }
-export type CandidateNotificationType = 'REJECTION' | 'WELCOME' | 'CV_TIMEOUT' | 'CV_REVISION_REQUIRED' | 'APPLICATION_RECEIVED' | 'APPLICATION_UPDATED' | 'INTERVIEW_SCHEDULED';
-export interface CandidateNotification { id: number; applicationId?: number; type: CandidateNotificationType; subject: string; message: string; status: 'PENDING' | 'SIMULATED' | 'SENT' | 'FAILED'; channel: 'EMAIL' | 'LOG'; createdAt: string; readAt?: string; }
+export type CandidateNotificationType = 'REJECTION' | 'WELCOME' | 'OFFER_ACCEPTED' | 'CV_TIMEOUT' | 'CV_REVISION_REQUIRED' | 'APPLICATION_RECEIVED' | 'APPLICATION_UPDATED' | 'INTERVIEW_SCHEDULED';
+export interface CandidateNotification { id: number; applicationId?: number; type: CandidateNotificationType; subject: string; message: string; status: 'PENDING' | 'SIMULATED' | 'SENT' | 'FAILED' | 'DELIVERED' | 'EMAIL_FAILED'; channel: 'EMAIL' | 'LOG' | 'IN_APP' | 'IN_APP_EMAIL'; createdAt: string; readAt?: string; }
 export interface CvRecommendation { score: number; decision: 'REJECTED' | 'REVIEW' | 'RECOMMENDED'; summary: string; matchedSkills: string[]; missingMandatorySkills: string[]; strengths: string[]; weaknesses: string[]; evidence: string[]; confidence: number; }
 export type HrAssistantScope = 'APPLICATIONS' | 'CANDIDATES' | 'JOB_OFFERS';
 export interface HrAssistantResponse { answer: string; filterApplied: boolean; matchingIds: number[]; followUpQuestions: string[]; }

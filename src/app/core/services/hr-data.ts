@@ -50,7 +50,16 @@ export class HrData {
   createInterview(interview: Interview) { return this.http.post<Interview>(`${this.base}interview-service/interviews`, interview); }
   updateInterview(id: number, interview: Interview) { return this.http.put<Interview>(`${this.base}interview-service/interviews/${id}`, interview); }
   updateInterviewStatus(id: number, status: Interview['status']) { return this.http.patch<Interview>(`${this.base}interview-service/interviews/${id}/status`, null, { params: new HttpParams().set('status', status ?? 'CANCELLED') }); }
-  addInterviewFeedback(id: number, feedback: string, notes: string, result: NonNullable<Interview['result']>) { return this.http.patch<Interview>(`${this.base}interview-service/interviews/${id}/feedback`, null, { params: new HttpParams().set('feedback', feedback).set('notes', notes).set('result', result) }); }
+  addInterviewFeedback(id: number, feedback: string, notes: string, result: NonNullable<Interview['result']>, hiring?: { departmentId: number; employeeRoleId: number; position: string }) {
+    let params = new HttpParams().set('feedback', feedback).set('notes', notes).set('result', result);
+    if (hiring) {
+      params = params
+        .set('departmentId', hiring.departmentId)
+        .set('employeeRoleId', hiring.employeeRoleId)
+        .set('position', hiring.position);
+    }
+    return this.http.patch<Interview>(`${this.base}interview-service/interviews/${id}/feedback`, null, { params });
+  }
   cv(id: number) { return this.http.get<CvFile>(`${this.base}application-service/cv/get/${id}`); }
   downloadCv(id: number) { return this.http.get(`${this.base}application-service/cv/download/${id}`, { responseType: 'blob' }); }
 }

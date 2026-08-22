@@ -108,6 +108,10 @@ td button {
   border: 1px solid #efcbd2;
   color: var(--color-danger);
 }
+.employee-form .field-error {
+  color: var(--color-danger);
+  font-size: var(--text-xs);
+}
 .recommendation {
   display: grid;
   gap: var(--space-3);

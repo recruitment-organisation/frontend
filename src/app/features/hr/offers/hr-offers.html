@@ -1,1 +1,191 @@
-<section class="offers"><app-page-header eyebrow="Recrutement" title="Offres d'emploi" description="Créez et modifiez les offres avec les champs validés par job-offer-service."/><div class="ui-page-actions"><button class="ui-button ui-button--primary" type="button" (click)="openCreateDialog()">Nouvelle offre</button></div><app-hr-assistant scope="JOB_OFFERS" [pageSize]="100" (filterChanged)="assistantFilterIds.set($event)"/>@if(error()){<p class="message error">{{error()}}</p>}@if(success()){<p class="message success">{{success()}}</p>}<article class="list"><header><div><p>Référentiel RH</p><h2>Offres existantes</h2></div><span>{{ filteredOffers().length }} résultat(s)</span></header>@if(loading()){<p>Chargement…</p>}@for(offer of filteredOffers();track offer.id){<div class="offer"><div><strong>{{offer.title}}</strong><p>{{offer.domain || 'Général'}} · {{offer.location}} · {{offer.employmentType}} · {{offer.experienceLevel}}</p></div><span class="status">{{offer.status}}</span><button class="ui-button ui-button--secondary" type="button" (click)="edit(offer)">Modifier</button></div>}@empty{<p class="empty">Aucune offre disponible.</p>}</article></section><app-dialog [title]="editingId() ? 'Modifier l’offre' : 'Nouvelle offre'" size="wide" [open]="offerDialog()" (closed)="cancelEdit()"><form class="ui-modal-form offer-form" [formGroup]="form" (ngSubmit)="submit()"><label class="ui-field">Titre<input formControlName="title"/></label><label class="ui-field">Domaine<input formControlName="domain" placeholder="Ex. Développement logiciel"/></label><label class="ui-field">Description<textarea formControlName="description" rows="4"></textarea></label><div class="ui-form-grid"><label class="ui-field">Localisation<input formControlName="location"/></label><label class="ui-field">Type<select formControlName="employmentType">@for(type of types;track type){<option [value]="type">{{type}}</option>}</select></label><label class="ui-field">Niveau<select formControlName="experienceLevel">@for(level of levels;track level){<option [value]="level">{{level}}</option>}</select></label><label class="ui-field">Statut<select formControlName="status">@for(status of statuses;track status){<option [value]="status">{{status}}</option>}</select></label><label class="ui-field">Ouverture<input type="date" formControlName="openingDate"/></label><label class="ui-field">Clôture<input type="date" formControlName="closingDate"/></label></div><fieldset class="ui-modal-section" formArrayName="requirements"><legend>Exigences</legend>@for(control of requirements.controls;track $index){<div [formGroupName]="$index" class="dynamic"><input formControlName="requirement" placeholder="Exigence"/><button type="button" (click)="removeRequirement($index)">−</button></div>}<button type="button" class="add" (click)="addRequirement()">Ajouter une exigence</button></fieldset><fieldset class="ui-modal-section" formArrayName="skills"><legend>Compétences</legend>@for(control of skills.controls;track $index){<div [formGroupName]="$index" class="dynamic"><input formControlName="skillName" placeholder="Compétence"/><label class="check"><input type="checkbox" formControlName="mandatory"/> Obligatoire</label><button type="button" (click)="removeSkill($index)">−</button></div>}<button type="button" class="add" (click)="addSkill()">Ajouter une compétence</button></fieldset><div class="ui-modal-actions"><button class="ui-button ui-button--secondary" type="button" (click)="cancelEdit()">Annuler</button><button class="ui-button ui-button--primary" type="submit">{{ editingId() ? 'Enregistrer' : 'Créer l’offre' }}</button></div></form></app-dialog>
+<section class="offers">
+  <app-page-header
+    eyebrow="Recrutement"
+    title="Offres d'emploi"
+    description="Créez et modifiez les offres avec les champs validés par job-offer-service."
+  />
+  <div class="ui-page-actions">
+    <button class="ui-button ui-button--primary" type="button" (click)="openCreateDialog()">
+      Nouvelle offre
+    </button>
+  </div>
+  <app-hr-assistant
+    scope="JOB_OFFERS"
+    [pageSize]="100"
+    (filterChanged)="assistantFilterIds.set($event)"
+  />
+  @if (error()) {
+    <p class="message error" role="alert">{{ error() }}</p>
+  }
+  <article class="list">
+    <header>
+      <div>
+        <p>Référentiel RH</p>
+        <h2>Offres existantes</h2>
+      </div>
+      <span>{{ filteredOffers().length }} résultat(s)</span>
+    </header>
+    @if (loading()) {
+      <p>Chargement…</p>
+    }
+    @for (offer of filteredOffers(); track offer.id) {
+      <div class="offer">
+        <div>
+          <strong>{{ offer.title }}</strong>
+          <p>
+            {{ offer.domain || 'Général' }} · {{ offer.location }} · {{ offer.employmentType }} ·
+            {{ offer.experienceLevel }}
+          </p>
+        </div>
+        <span class="status">{{ offer.status }}</span
+        ><button class="ui-button ui-button--secondary" type="button" (click)="edit(offer)">
+          Modifier
+        </button>
+      </div>
+    } @empty {
+      <p class="empty">Aucune offre disponible.</p>
+    }
+  </article>
+</section>
+<app-dialog
+  [title]="editingId() ? 'Modifier l’offre' : 'Nouvelle offre'"
+  size="wide"
+  [open]="offerDialog()"
+  (closed)="cancelEdit()"
+  ><form
+    class="ui-modal-form offer-form"
+    [formGroup]="form"
+    (ngSubmit)="submit()"
+    autocomplete="off"
+    novalidate
+  >
+    <p class="required-note">Les champs marqués d’un * sont obligatoires.</p>
+    <label class="ui-field"
+      >Titre *<input formControlName="title" />
+      @if (form.controls.title.touched && form.controls.title.invalid) {
+        <small class="field-error">Titre obligatoire, 100 caractères maximum.</small>
+      }</label
+    ><label class="ui-field"
+      >Domaine *<input formControlName="domain" placeholder="Ex. Développement logiciel" />
+      @if (form.controls.domain.touched && form.controls.domain.invalid) {
+        <small class="field-error">Domaine obligatoire, 100 caractères maximum.</small>
+      }</label
+    ><label class="ui-field"
+      >Description *<textarea formControlName="description" rows="4"></textarea>
+      @if (form.controls.description.touched && form.controls.description.invalid) {
+        <small class="field-error">Description obligatoire, 3 000 caractères maximum.</small>
+      }
+    </label>
+    <div class="ui-form-grid">
+      <label class="ui-field"
+        >Localisation *<input formControlName="location" />
+        @if (form.controls.location.touched && form.controls.location.invalid) {
+          <small class="field-error">Localisation obligatoire.</small>
+        }</label
+      ><label class="ui-field"
+        >Type<select formControlName="employmentType">
+          @for (type of types; track type) {
+            <option [value]="type">{{ type }}</option>
+          }
+        </select></label
+      ><label class="ui-field"
+        >Niveau<select formControlName="experienceLevel">
+          @for (level of levels; track level) {
+            <option [value]="level">{{ level }}</option>
+          }
+        </select></label
+      ><label class="ui-field"
+        >Statut<select formControlName="status">
+          @for (status of statuses; track status) {
+            <option [value]="status">{{ status }}</option>
+          }
+        </select></label
+      ><label class="ui-field"
+        >Ouverture *<input type="date" formControlName="openingDate" />
+        @if (form.controls.openingDate.touched && form.controls.openingDate.invalid) {
+          <small class="field-error">Date d’ouverture obligatoire.</small>
+        }</label
+      ><label class="ui-field"
+        >Clôture *<input type="date" formControlName="closingDate" />
+        @if (form.controls.closingDate.touched && form.controls.closingDate.invalid) {
+          <small class="field-error">Date de clôture obligatoire.</small>
+        }
+      </label>
+    </div>
+    @if (
+      form.hasError('invalidDateRange') &&
+      (form.controls.openingDate.touched || form.controls.closingDate.touched)
+    ) {
+      <small class="field-error date-error">La clôture ne peut pas précéder l’ouverture.</small>
+    }
+    <fieldset class="ui-modal-section" formArrayName="requirements">
+      <legend>Exigences *</legend>
+      @for (control of requirements.controls; track $index) {
+        <div [formGroupName]="$index" class="dynamic">
+          <div>
+            <input
+              formControlName="requirement"
+              placeholder="Exigence"
+              autocomplete="off"
+              (input)="syncRequirement($index, $event)"
+            />
+            @if (control.get('requirement')?.touched && control.get('requirement')?.invalid) {
+              <small class="field-error">Exigence obligatoire, 255 caractères maximum.</small>
+            }
+          </div>
+          <button
+            type="button"
+            (click)="removeRequirement($index)"
+            aria-label="Supprimer cette exigence"
+          >
+            −
+          </button>
+        </div>
+      }
+      <button type="button" class="add" (click)="addRequirement()">Ajouter une exigence</button>
+    </fieldset>
+    <fieldset class="ui-modal-section" formArrayName="skills">
+      <legend>Compétences *</legend>
+      @for (control of skills.controls; track $index) {
+        <div [formGroupName]="$index" class="dynamic">
+          <div>
+            <input
+              formControlName="skillName"
+              placeholder="Compétence"
+              autocomplete="off"
+              (input)="syncSkill($index, $event)"
+            />
+            @if (control.get('skillName')?.touched && control.get('skillName')?.invalid) {
+              <small class="field-error">Compétence obligatoire.</small>
+            }
+          </div>
+          <label class="check"
+            ><input type="checkbox" formControlName="mandatory" /> Obligatoire</label
+          ><button
+            type="button"
+            (click)="removeSkill($index)"
+            aria-label="Supprimer cette compétence"
+          >
+            −
+          </button>
+        </div>
+      }
+      <button type="button" class="add" (click)="addSkill()">Ajouter une compétence</button>
+    </fieldset>
+    @if (offerError()) {
+      <p class="message error dialog-error" role="alert">{{ offerError() }}</p>
+    }
+    <div class="ui-modal-actions">
+      <button
+        class="ui-button ui-button--secondary"
+        type="button"
+        [disabled]="saving()"
+        (click)="cancelEdit()"
+      >
+        Annuler</button
+      ><button class="ui-button ui-button--primary" type="submit" [disabled]="saving()">
+        {{ saving() ? 'Enregistrement…' : editingId() ? 'Enregistrer' : 'Créer l’offre' }}
+      </button>
+    </div>
+  </form></app-dialog
+>

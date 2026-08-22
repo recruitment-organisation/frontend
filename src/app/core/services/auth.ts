@@ -87,7 +87,7 @@ export class Auth {
       return '/employee/dashboard';
     }
 
-    return '/auth/login';
+    return '/unauthorized';
   }
 
   private storeSession(response: LoginResponse): void {
