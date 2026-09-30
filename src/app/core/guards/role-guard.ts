@@ -10,7 +10,7 @@ export const roleGuard = (allowedRoles: string[]): CanActivateFn => {
     const hasAccess = allowedRoles.some((role) => authService.hasRole(role));
 
     if (!hasAccess) {
-      return router.createUrlTree(['/unauthorized']);
+      return router.createUrlTree(['/403']);
     }
 
     return true;

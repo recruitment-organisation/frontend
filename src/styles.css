@@ -1,4 +1,16 @@
 :root {
+  --background: #f3f2ed;
+  --surface: #fffefa;
+  --surface-secondary: #f8f7f2;
+  --primary: #27675f;
+  --primary-hover: #174c46;
+  --accent: #b55338;
+  --text-primary: #192321;
+  --text-secondary: #66736f;
+  --border: #d9d8d0;
+  --success: #27705b;
+  --warning: #8b641f;
+  --danger: #a93f49;
   --color-bg: #f3f2ed;
   --color-surface: #fffefa;
   --color-surface-muted: #f8f7f2;

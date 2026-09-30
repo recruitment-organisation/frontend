@@ -20,7 +20,7 @@ export class WorkspaceShellComponent {
   readonly brandLink = input.required<string>();
   readonly workspaceLabel = input.required<string>();
   readonly items = input<readonly WorkspaceNavItem[]>([]);
-  readonly tone = input<'candidate' | 'hr' | 'employee'>('candidate');
+  readonly tone = input<'candidate' | 'hr' | 'employee' | 'manager' | 'admin'>('candidate');
   readonly notificationItem = computed(() => this.items().find(item => item.badge !== undefined));
 
   constructor(readonly auth: Auth) {}

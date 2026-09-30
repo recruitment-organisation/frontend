@@ -1,16 +1,17 @@
 <header class="header" [class.scrolled]="scrolled()">
   <div class="header-inner">
-    <a routerLink="/" class="brand" (click)="closeMenu()" aria-label="HireFlow Technologies, accueil">
+    <a routerLink="/" class="brand" (click)="closeMenu()" aria-label="Recruitment Intelligent, accueil">
       <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
-      <span><strong>HireFlow</strong><small>technologies numériques</small></span>
+      <span><strong>Recruitment Intelligent</strong><small>recrutement augmenté</small></span>
     </a>
     <button class="menu-toggle" type="button" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen()" aria-controls="public-menu" aria-label="Ouvrir le menu de navigation"><span></span><span></span><span></span></button>
     <nav id="public-menu" class="navigation" [class.open]="menuOpen()" aria-label="Navigation principale">
       <a routerLink="/" [fragment]="'top'" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">Accueil</a>
-      <a routerLink="/services" routerLinkActive="active" (click)="closeMenu()">Expertises</a>
-      <a routerLink="/about" routerLinkActive="active" (click)="closeMenu()">La société</a>
-      <a routerLink="/contact" routerLinkActive="active" (click)="closeMenu()">Contact</a>
-      <span class="navigation-actions"><a routerLink="/auth/login" class="signup-link" (click)="closeMenu()">Espace sécurisé</a></span>
+      <a routerLink="/" fragment="features" (click)="closeMenu()">Fonctionnalités</a>
+      <a routerLink="/about" routerLinkActive="active" (click)="closeMenu()">Entreprises</a>
+      <a routerLink="/auth/signup" (click)="closeMenu()">Offres d’emploi</a>
+      <a routerLink="/about" routerLinkActive="active" (click)="closeMenu()">À propos</a>
+      <span class="navigation-actions"><a routerLink="/auth/login" class="signup-link" (click)="closeMenu()">Se connecter</a></span>
     </nav>
   </div>
 </header>

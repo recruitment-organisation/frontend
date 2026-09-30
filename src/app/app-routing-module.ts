@@ -22,6 +22,11 @@ const routes: Routes = [
     loadChildren: () => import('./features/candidate/candidate-module').then(m => m.CandidateModule)
   },
   {
+    path: 'admin',
+    canActivate: [authGuard, roleGuard(['ADMIN'])],
+    loadChildren: () => import('./features/admin/admin-module').then(m => m.AdminModule)
+  },
+  {
     path: 'hr',
     canActivate: [authGuard, roleGuard(['HR'])],
     loadChildren: () => import('./features/hr/hr-module').then(m => m.HrModule)
@@ -40,6 +45,7 @@ const routes: Routes = [
     path: 'unauthorized',
     component: UnauthorizedComponent
   },
+  { path: '403', redirectTo: 'unauthorized' },
   {
     path: '',
     loadChildren: () => import('./features/public/public-module').then(m => m.PublicModule)

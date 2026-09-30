@@ -71,6 +71,10 @@ export class Auth {
   getDefaultRoute(): string {
     const roles = this.getRoles();
 
+    if (roles.includes('ADMIN')) {
+      return '/admin/dashboard';
+    }
+
     if (roles.includes('CANDIDATE')) {
       return '/candidate/dashboard';
     }
@@ -107,7 +111,9 @@ export class Auth {
       firstName: response.firstName,
       lastName: response.lastName,
       roles: response.roles,
-      userId: response.userId
+      userId: response.userId,
+      companyId: response.companyId,
+      companyName: response.companyName
     };
 
     localStorage.setItem(this.USER_KEY, JSON.stringify(user));

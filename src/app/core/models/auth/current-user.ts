@@ -6,4 +6,6 @@ export interface CurrentUser {
     lastName: string;
     roles: string[];
     userId?: number;
+    companyId?: number;
+    companyName?: string;
 }

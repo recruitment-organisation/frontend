@@ -6,4 +6,9 @@
   @if (note()) {
     <span class="note">{{ note() }}</span>
   }
+  @if (actionLabel() && actionLink()) {
+    <a class="ui-button ui-button--primary" [routerLink]="actionLink()">{{ actionLabel() }}</a>
+  } @else if (actionLabel()) {
+    <button class="ui-button ui-button--primary" type="button" (click)="action.emit()">{{ actionLabel() }}</button>
+  }
 </section>

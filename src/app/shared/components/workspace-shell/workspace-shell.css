@@ -327,6 +327,12 @@ footer button svg {
   --role-sidebar: #172522;
   --role-sidebar-soft: #253a35;
 }
+.tone-admin {
+  --role-accent: #9de2d0;
+  --role-accent-ink: #103c34;
+  --role-sidebar: #102b31;
+  --role-sidebar-soft: #183d43;
+}
 .tone-manager {
   --role-accent: #f0b37d;
   --role-accent-ink: #462616;

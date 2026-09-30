@@ -9,4 +9,6 @@ export interface LoginResponse {
     lastName: string;
     roles: string[];
     userId?: number;
+    companyId?: number;
+    companyName?: string;
 }
