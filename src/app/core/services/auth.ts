@@ -16,6 +16,7 @@ import { Observable, tap, of, catchError, map, throwError } from 'rxjs';
   providedIn: 'root'
 })
 export class Auth {
+  private readonly APPLICATION_ROLES = new Set(['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE', 'CANDIDATE']);
   private readonly router = inject(Router);
   private readonly baseUrl =  `${environment.apiUrl}auth-service/auth`;
   private readonly TOKEN_KEY = 'access_token';
@@ -110,7 +111,7 @@ export class Auth {
       email: response.email,
       firstName: response.firstName,
       lastName: response.lastName,
-      roles: response.roles,
+      roles: this.applicationRoles(response.roles),
       userId: response.userId,
       companyId: response.companyId,
       companyName: response.companyName
@@ -148,7 +149,9 @@ export class Auth {
 
   getCurrentUser(): CurrentUser | null {
     const user = localStorage.getItem(this.USER_KEY);
-    return user ? JSON.parse(user) : null;
+    if (!user) return null;
+    const parsed = JSON.parse(user) as CurrentUser;
+    return { ...parsed, roles: this.applicationRoles(parsed.roles) };
   }
 
   getRoles(): string[] {
@@ -196,6 +199,11 @@ export class Auth {
       && typeof response.firstName === 'string'
       && typeof response.lastName === 'string'
       && Array.isArray(response.roles);
+  }
+
+  private applicationRoles(roles: string[] | null | undefined): string[] {
+    return (roles ?? []).filter((role, index, values) =>
+      this.APPLICATION_ROLES.has(role) && values.indexOf(role) === index);
   }
 
   restoreSession(): Observable<boolean> {

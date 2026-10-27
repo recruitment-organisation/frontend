@@ -14,6 +14,10 @@ export class EmployeeData {
     return this.http.get<Employee>(`${this.baseUrl}/get/${id}`);
   }
 
+  me(): Observable<Employee> {
+    return this.http.get<Employee>(`${this.baseUrl}/me`);
+  }
+
   getRoles(page = 0, size = 100): Observable<PageResponse<EmployeeRole>> {
     return this.http.get<PageResponse<EmployeeRole>>(`${this.rolesUrl}/getall`, {
       params: { page, size }

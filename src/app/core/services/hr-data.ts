@@ -46,6 +46,7 @@ export class HrData {
   interview(id: number) { return this.http.get<Interview>(`${this.base}interview-service/interviews/${id}`); }
   interviewsByApplication(applicationId: number, page = 0, size = 50) { return this.http.get<PageResponse<Interview>>(`${this.base}interview-service/interviews/application/${applicationId}`, { params: this.pageParams(page, size) }); }
   interviewsByInterviewer(interviewerId: number, page = 0, size = 50) { return this.http.get<PageResponse<Interview>>(`${this.base}interview-service/interviews/interviewer/${interviewerId}`, { params: this.pageParams(page, size) }); }
+  interviewsForCurrentInterviewer(page = 0, size = 50) { return this.http.get<PageResponse<Interview>>(`${this.base}interview-service/interviews/interviewer/me`, { params: this.pageParams(page, size) }); }
   interviewsByStatus(status: InterviewStatus, page = 0, size = 50) { return this.http.get<PageResponse<Interview>>(`${this.base}interview-service/interviews/status/${status}`, { params: this.pageParams(page, size) }); }
   createInterview(interview: Interview) { return this.http.post<Interview>(`${this.base}interview-service/interviews`, interview); }
   updateInterview(id: number, interview: Interview) { return this.http.put<Interview>(`${this.base}interview-service/interviews/${id}`, interview); }

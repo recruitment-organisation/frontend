@@ -43,7 +43,7 @@ export class EmployeeInterviewsComponent {
     this.api.currentEmployee().pipe(
       switchMap(employee => {
         this.employee.set(employee);
-        return this.api.interviewsByInterviewer(employee.id, 0, 100).pipe(catchError(() => of({ content: [] as Interview[], totalElements: 0, totalPages: 0, number: 0, size: 100 } as PageResponse<Interview>)));
+        return this.api.interviewsForCurrentInterviewer(0, 100).pipe(catchError(() => of({ content: [] as Interview[], totalElements: 0, totalPages: 0, number: 0, size: 100 } as PageResponse<Interview>)));
       }),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({

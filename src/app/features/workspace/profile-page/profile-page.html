@@ -65,8 +65,8 @@
   <form class="account-form" [formGroup]="accountForm" (ngSubmit)="updateAccount()">
     <h2>Compte et sécurité</h2>
     <p>Modifiez votre mot de passe Keycloak. La modification d’email est désactivée jusqu’à la mise à disposition d’un flux backend qui synchronise Keycloak et le profil métier.</p>
-    <label>Mot de passe<input type="password" formControlName="password" placeholder="Nouveau mot de passe (8 caractères minimum)"/></label>
-    <label>Confirmation<input type="password" formControlName="confirmation" placeholder="Confirmer le mot de passe"/></label>
+    <label>Mot de passe<input type="password" formControlName="password" autocomplete="new-password" placeholder="Nouveau mot de passe (8 caractères minimum)"/></label>
+    <label>Confirmation<input type="password" formControlName="confirmation" autocomplete="new-password" placeholder="Confirmer le mot de passe"/></label>
     @if(accountError()){<p class="profile-error">{{ accountError() }}</p>} @if(accountSuccess()){<p class="profile-success">{{ accountSuccess() }}</p>}
     <button class="ui-button ui-button--primary" type="submit">Enregistrer</button>
   </form>

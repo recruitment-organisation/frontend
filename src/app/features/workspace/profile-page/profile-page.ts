@@ -41,10 +41,7 @@ export class ProfilePageComponent {
       return;
     }
 
-    const userId = user?.userId;
-    if (!userId) return;
-
-    this.employeeData.getById(userId)
+    this.employeeData.me()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: employee => this.employee.set(employee),
